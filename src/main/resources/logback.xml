@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false" scanPeriod="60 seconds"
+	debug="false">
+	<property name="LOG_HOME" value="logs" />
+	<property name="LOG_pattern1" value="%d{yyyy-MM-dd HH:mm:ss} [%magenta(%t):%c %L] %highlight(%-5p) -> %m%n" />
+	<property name="LOG_pattern2" value="%d{yyyy-MM-dd HH:mm:ss} [%t:%c %L] %-5p -> %m%n" />
+
+	<appender name="Console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<!-- 输出的格式 -->
+		<encoder
+			class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${LOG_pattern1}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="File"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<append>true</append>
+		<encoder>
+			<!--指定日志内容格式 -->
+			<pattern>${LOG_pattern2}</pattern>
+			<charset>utf8</charset>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<!--日志最大保存90天 -->
+			<maxHistory>90</maxHistory>
+			<!--日志最大的文件大小 -->
+			<maxFileSize>16MB</maxFileSize>
+			<!--日志最大保存100MB -->
+			<totalSizeCap>256MB</totalSizeCap>
+		</rollingPolicy>
+	</appender>
+
+	<root level="INFO">
+		<!--ref表示具体的appender name -->
+		<appender-ref ref="Console" />
+		<appender-ref ref="File" />
+	</root>
+</configuration>
