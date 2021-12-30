@@ -19,8 +19,34 @@ public final class Server {
     /**
      * 初始化服务端
      */
-    private static void initServer() throws IOException {
-        netCore = NetCore.getInstance();
+    private static void initServer() throws Exception {
+        LOGGER.info("开始初始化配置...");
+        configuration = ServerConfiguration.load();
+        try {
+            LOGGER.info("开始初始化网络...");
+            netCore = NetCore.getInstance();
+        } catch (IOException e) {
+            LOGGER.error("网络初始化失败！", e);
+            throw e;
+        }
+    }
+
+    /**
+     * 获取服务端配置
+     *
+     * @return 配置
+     */
+    public static ServerConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * 获取网络核心
+     *
+     * @return 网络核心
+     */
+    public static NetCore getNetCore() {
+        return netCore;
     }
 
     /**
@@ -37,9 +63,11 @@ public final class Server {
     public static void start() {
         printHeadline();
         try {
+            LOGGER.info("开始初始化XChat-server...");
             initServer();
-        } catch (IOException e) {
-            LOGGER.error("", e);
+        } catch (Exception e) {
+            LOGGER.error("初始化失败！");
+            System.exit(-1);
         }
     }
 }

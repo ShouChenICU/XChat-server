@@ -1,7 +1,7 @@
 package icu.xchat.server;
 
 /**
- * 服务端入口类
+ * XChat-server入口
  *
  * @author shouchen
  */

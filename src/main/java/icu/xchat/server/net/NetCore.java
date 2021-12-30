@@ -14,6 +14,10 @@ public class NetCore {
     private ServerSocketChannel serverSocketChannel;
     private Selector mainSelector;
 
+    /**
+     * 获取单例
+     * @return 实例
+     */
     public static NetCore getInstance() throws IOException {
         if (netCore == null) {
             synchronized (NetCore.class) {

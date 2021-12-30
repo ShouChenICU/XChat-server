@@ -2,3 +2,4 @@ target
 src/main/java/icu/xchat/test
 logs
 .idea
+xchat-server.conf
