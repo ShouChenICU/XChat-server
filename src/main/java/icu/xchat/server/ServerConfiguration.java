@@ -18,6 +18,7 @@ public final class ServerConfiguration {
     private static final String DEFAULT_HOST = "localhost";
     private static final String PORT = "port";
     private static final String DEFAULT_PORT = "41321";
+    private static final String PUBLIC_THREAD_POLL_COUNT = "threadPoolCount";
     private final Properties properties;
 
     /**
@@ -45,6 +46,7 @@ public final class ServerConfiguration {
         ServerConfiguration configuration = new ServerConfiguration(new Properties());
         configuration.setHost(DEFAULT_HOST);
         configuration.setPort(Integer.parseInt(DEFAULT_PORT));
+        configuration.setThreadPoolCount(Runtime.getRuntime().availableProcessors());
         return configuration;
     }
 
@@ -131,6 +133,49 @@ public final class ServerConfiguration {
      * @return 服务器端口
      */
     public int getPort() {
-        return Integer.parseInt(properties.getProperty(PORT, DEFAULT_PORT));
+        int port;
+        try {
+            port = Integer.parseInt(properties.getProperty(PORT, DEFAULT_PORT));
+            if (port < 1 || port > 65535) {
+                LOGGER.warn("端口范围错误，将使用默认端口：" + DEFAULT_PORT);
+                port = Integer.parseInt(DEFAULT_PORT);
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.warn("端口格式错误，将使用默认端口：" + DEFAULT_PORT);
+            port = Integer.parseInt(DEFAULT_PORT);
+        }
+        return port;
+    }
+
+    /**
+     * 设置线程数
+     *
+     * @param count 线程数量
+     */
+    public void setThreadPoolCount(int count) {
+        if (count < 1) {
+            count = 1;
+        }
+        properties.setProperty(PUBLIC_THREAD_POLL_COUNT, String.valueOf(count));
+    }
+
+    /**
+     * 获取线程数
+     *
+     * @return 线程数量
+     */
+    public int getThreadPoolCount() {
+        int count;
+        try {
+            count = Integer.parseInt(properties.getProperty(PUBLIC_THREAD_POLL_COUNT));
+            if (count < 1) {
+                LOGGER.warn("配置的线程数小于1,将使用默认设置！");
+                count = 1;
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.warn("线程数格式错误，将使用默认设置！");
+            count = Runtime.getRuntime().availableProcessors();
+        }
+        return count;
     }
 }

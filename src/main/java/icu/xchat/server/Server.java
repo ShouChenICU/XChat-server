@@ -20,10 +20,13 @@ public final class Server {
      * 初始化服务端
      */
     private static void initServer() throws Exception {
-        LOGGER.info("开始初始化配置...");
+        LOGGER.info("初始化配置...");
         configuration = ServerConfiguration.load();
+        LOGGER.info("初始化公共线程池...");
+        PublicThreadPool.init(configuration.getThreadPoolCount());
+        LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolCount());
         try {
-            LOGGER.info("开始初始化网络...");
+            LOGGER.info("初始化网络...");
             netCore = NetCore.getInstance();
         } catch (IOException e) {
             LOGGER.error("网络初始化失败！", e);

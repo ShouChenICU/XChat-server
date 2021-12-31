@@ -16,6 +16,7 @@ public class NetCore {
 
     /**
      * 获取单例
+     *
      * @return 实例
      */
     public static NetCore getInstance() throws IOException {
@@ -30,7 +31,8 @@ public class NetCore {
     }
 
     private NetCore() throws IOException {
-        serverSocketChannel=ServerSocketChannel.open();
+        serverSocketChannel = ServerSocketChannel.open();
+        mainSelector = Selector.open();
 
 
     }

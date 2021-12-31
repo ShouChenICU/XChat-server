@@ -2,6 +2,7 @@ package icu.xchat.server.net;
 
 import icu.xchat.server.entity.User;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,6 +15,6 @@ public class Client {
     private Map<Integer, Task> taskMap;
 
     public Client() {
-
+        taskMap = new HashMap<>();
     }
 }
