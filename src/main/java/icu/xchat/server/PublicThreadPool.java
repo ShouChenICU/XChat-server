@@ -1,5 +1,8 @@
 package icu.xchat.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.*;
 
 /**
@@ -8,8 +11,11 @@ import java.util.concurrent.*;
  * @author shouchen
  */
 public final class PublicThreadPool {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublicThreadPool.class);
     private static final int MAX_WORK_COUNT = 1024;
+    private static final String THREAD_NAME = "PublicThread";
     private static ThreadPoolExecutor executor;
+    private static volatile int threadNum = 0;
 
     /**
      * 初始化公共线程池
@@ -20,9 +26,18 @@ public final class PublicThreadPool {
         executor = new ThreadPoolExecutor(threadCount, threadCount, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(MAX_WORK_COUNT), runnable -> {
             Thread thread = new Thread(runnable);
+            synchronized (PublicThreadPool.class) {
+                thread.setName(THREAD_NAME + "-" + threadNum++);
+            }
             thread.setDaemon(true);
             return thread;
-        }, new ThreadPoolExecutor.CallerRunsPolicy());
+        }, new ThreadPoolExecutor.CallerRunsPolicy() {
+            @Override
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                LOGGER.warn("公共线程池任务数已满！");
+                super.rejectedExecution(r, e);
+            }
+        });
     }
 
     /**
