@@ -5,7 +5,7 @@ package icu.xchat.server;
  *
  * @author shouchen
  */
-public final class GlobalVariables {
+final class GlobalVariables {
     private static final String[] EDITIONS = new String[]{"Alpha", "Beta", "Release"};
     /**
      * 主版本号

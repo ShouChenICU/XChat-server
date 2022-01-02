@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author shouchen
  */
-public class Client {
+class Client {
     private User user;
     private Map<Integer, Task> taskMap;
 

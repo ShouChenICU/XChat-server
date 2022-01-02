@@ -5,7 +5,7 @@ package icu.xchat.server.net;
  *
  * @author shouchen
  */
-public abstract class Task {
+abstract class Task {
     private int id;
     private int packetCount;
     private int packetSum;

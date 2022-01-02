@@ -5,7 +5,7 @@ package icu.xchat.server.net;
  *
  * @author shouchen
  */
-public class Packet {
+class Packet {
     private int groupID;
     private int id;
 
