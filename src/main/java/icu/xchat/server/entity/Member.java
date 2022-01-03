@@ -6,4 +6,8 @@ package icu.xchat.server.entity;
  * @author shouchen
  */
 public class Member {
+    private int rid;
+    private String uidCode;
+    private int role;
+    private long joinTime;
 }

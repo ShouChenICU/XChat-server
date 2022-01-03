@@ -10,7 +10,7 @@ import java.util.concurrent.*;
  *
  * @author shouchen
  */
-public final class PublicThreadPool {
+public class PublicThreadPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicThreadPool.class);
     private static final int MAX_WORK_COUNT = 1024;
     private static final String THREAD_NAME = "PublicThread";
@@ -22,7 +22,7 @@ public final class PublicThreadPool {
      *
      * @param threadCount 线程数量
      */
-    public static void init(int threadCount) {
+    protected static void init(int threadCount) {
         executor = new ThreadPoolExecutor(threadCount, threadCount, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(MAX_WORK_COUNT), runnable -> {
             Thread thread = new Thread(runnable);

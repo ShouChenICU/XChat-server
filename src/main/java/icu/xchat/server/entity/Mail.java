@@ -6,4 +6,10 @@ package icu.xchat.server.entity;
  * @author shouchen
  */
 public class Mail {
+    private int id;
+    private String sender;
+    private String receiver;
+    private String theme;
+    private String content;
+    private long creationTime;
 }
