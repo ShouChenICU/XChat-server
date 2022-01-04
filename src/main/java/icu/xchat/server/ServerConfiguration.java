@@ -25,6 +25,10 @@ public final class ServerConfiguration {
     private static final String DB_URL = "db-url";
     private static final String DB_USERNAME = "db-username";
     private static final String DB_PASSWORD = "db-password";
+    private static final String KEYPAIR_TYPE = "keypair-type";
+    private static final String KEYPAIR_TYPE_DEFAULT = ServerKeyPair.KEYPAIR_RSA;
+    private static final String KEYPAIR_SIZE = "keypair-size";
+    private static final String KEYPAIR_SIZE_DEFAULT = ServerKeyPair.KEYPAIR_SIZE_DEFAULT;
     private final Properties properties;
 
     /**
@@ -57,6 +61,8 @@ public final class ServerConfiguration {
         configuration.setDbUrl("jdbc:sqlite:xchat-server.db");
         configuration.setDbUsername("");
         configuration.setDbPassword("");
+        configuration.setKeypairType(KEYPAIR_TYPE_DEFAULT);
+        configuration.setKeypairSize(Integer.parseInt(KEYPAIR_SIZE_DEFAULT));
         return configuration;
     }
 
@@ -110,14 +116,18 @@ public final class ServerConfiguration {
             writer.write(SERVER_PORT + "=" + getServerPort() + "\n\n");
             writer.write("# 任务线程池大小\n");
             writer.write(PUBLIC_THREAD_POLL_SIZE + "=" + getThreadPoolSize() + "\n\n");
-            writer.write("# 数据库类型（当前仅支持sqlite）\n");
+            writer.write("# 数据库类型（当前仅支持SQLite）\n");
             writer.write(DB_TYPE + "=" + getDbType() + "\n\n");
             writer.write("# JDBC链接地址\n");
             writer.write(DB_URL + "=" + getDbUrl() + "\n\n");
             writer.write("# 数据库用户名\n");
             writer.write(DB_USERNAME + "=" + getDbUsername() + "\n\n");
             writer.write("# 数据库密码\n");
-            writer.write(DB_PASSWORD + "=" + getDbPassword());
+            writer.write(DB_PASSWORD + "=" + getDbPassword() + "\n\n");
+            writer.write("# 服务端密钥对类型（当前仅支持RSA）\n");
+            writer.write(KEYPAIR_TYPE + "=" + getKeypairType() + "\n\n");
+            writer.write("# 服务端密钥对长度\n");
+            writer.write(KEYPAIR_SIZE + "=" + getKeypairSize());
             writer.flush();
         }
     }
@@ -274,5 +284,48 @@ public final class ServerConfiguration {
      */
     public String getDbPassword() {
         return properties.getProperty(DB_PASSWORD, "");
+    }
+
+    /**
+     * 设置服务端密钥对类型
+     *
+     * @param keypairType 密钥对类型
+     */
+    public void setKeypairType(String keypairType) {
+        properties.setProperty(KEYPAIR_TYPE, keypairType);
+    }
+
+    /**
+     * 获取服务端密钥对类型
+     *
+     * @return 密钥对类型
+     */
+    public String getKeypairType() {
+        return properties.getProperty(KEYPAIR_TYPE);
+    }
+
+    /**
+     * 设置服务端密钥对长度
+     *
+     * @param keypairSize 密钥对长度
+     */
+    public void setKeypairSize(int keypairSize) {
+        properties.setProperty(KEYPAIR_SIZE, String.valueOf(keypairSize));
+    }
+
+    /**
+     * 获取密钥对长度
+     *
+     * @return 密钥对长度
+     */
+    public int getKeypairSize() {
+        int size;
+        try {
+            size = Integer.parseInt(properties.getProperty(KEYPAIR_SIZE, KEYPAIR_SIZE_DEFAULT));
+        } catch (NumberFormatException e) {
+            LOGGER.warn("密钥对长度格式错误，将使用默认设置！");
+            size = Integer.parseInt(KEYPAIR_SIZE_DEFAULT);
+        }
+        return size;
     }
 }

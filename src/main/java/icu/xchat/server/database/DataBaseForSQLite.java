@@ -15,6 +15,13 @@ import java.sql.SQLException;
 class DataBaseForSQLite extends DataBase {
     private SQLiteDataSource sqLiteDataSource;
 
+    /**
+     * 初始化数据库结构
+     */
+    private void initSchema() {
+        // TODO: 2022/1/4
+    }
+
     @Override
     public void init() {
         SQLiteConfig config = new SQLiteConfig();
@@ -25,6 +32,7 @@ class DataBaseForSQLite extends DataBase {
         config.enforceForeignKeys(true);
         sqLiteDataSource = new SQLiteDataSource(config);
         sqLiteDataSource.setUrl(Server.getConfiguration().getDbUrl());
+        initSchema();
     }
 
     @Override
