@@ -1,5 +1,7 @@
 package icu.xchat.server.entity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -10,9 +12,26 @@ import java.util.Objects;
 public class User {
     private String uidCode;
     private String nick;
+    private final Map<String, String> attributes;
     private int tid;
     private int status;
     private long timeStamp;
+
+    public User() {
+        attributes = new HashMap<>();
+    }
+
+    public String getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
+    }
+
+    public void removeAttribute(String key) {
+        attributes.remove(key);
+    }
 
     public String getUidCode() {
         return uidCode;

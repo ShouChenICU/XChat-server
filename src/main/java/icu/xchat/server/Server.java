@@ -23,8 +23,8 @@ public final class Server {
         LOGGER.info("初始化配置...");
         configuration = ServerConfiguration.load();
         LOGGER.info("初始化公共线程池...");
-        PublicThreadPool.init(configuration.getThreadPoolCount());
-        LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolCount());
+        PublicThreadPool.init(configuration.getThreadPoolSize());
+        LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
         try {
             LOGGER.info("初始化网络...");
             netCore = NetCore.getInstance();

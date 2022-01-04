@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 03/01/2022 23:00:15
+ Date: 04/01/2022 21:39:53
 */
 
 PRAGMA foreign_keys = false;
@@ -23,10 +23,11 @@ CREATE TABLE "r_members" (
   "rid" integer NOT NULL,
   "uid_code" text NOT NULL,
   "role" integer NOT NULL DEFAULT 0,
+  "permission" integer NOT NULL,
   "join_time" integer NOT NULL DEFAULT 0,
   PRIMARY KEY ("rid", "uid_code"),
   CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("id_code") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -73,6 +74,7 @@ CREATE TABLE "t_messages" (
   "rid" integer NOT NULL,
   "type" text NOT NULL,
   "content" text NOT NULL,
+  "delete_mark" integer NOT NULL DEFAULT 0,
   "time_stamp" integer NOT NULL DEFAULT 0,
   CONSTRAINT "uid_code" FOREIGN KEY ("sender") REFERENCES "t_users" ("uid_code") ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -84,11 +86,10 @@ CREATE TABLE "t_messages" (
 DROP TABLE IF EXISTS "t_rooms";
 CREATE TABLE "t_rooms" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "uid_code" text NOT NULL,
   "topic" text NOT NULL,
-  "level" integer NOT NULL,
-  "creation_time" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
+  "level" integer NOT NULL DEFAULT 0,
+  "description" text NOT NULL DEFAULT '',
+  "creation_time" integer NOT NULL DEFAULT 0
 );
 
 -- ----------------------------
