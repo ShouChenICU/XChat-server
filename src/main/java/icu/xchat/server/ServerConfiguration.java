@@ -26,9 +26,9 @@ public final class ServerConfiguration {
     private static final String DB_USERNAME = "db-username";
     private static final String DB_PASSWORD = "db-password";
     private static final String KEYPAIR_TYPE = "keypair-type";
-    private static final String KEYPAIR_TYPE_DEFAULT = ServerKeyPair.KEYPAIR_RSA;
+    private static final String KEYPAIR_TYPE_DEFAULT = ServerKeyPairTool.KEYPAIR_RSA;
     private static final String KEYPAIR_SIZE = "keypair-size";
-    private static final String KEYPAIR_SIZE_DEFAULT = ServerKeyPair.KEYPAIR_SIZE_DEFAULT;
+    private static final String KEYPAIR_SIZE_DEFAULT = ServerKeyPairTool.KEYPAIR_SIZE_DEFAULT;
     private final Properties properties;
 
     /**
@@ -229,7 +229,7 @@ public final class ServerConfiguration {
      * @return 数据库类型
      */
     public String getDbType() {
-        return properties.getProperty(DB_TYPE, DB_TYPE_DEFAULT);
+        return properties.getProperty(DB_TYPE, DB_TYPE_DEFAULT).toLowerCase();
     }
 
     /**
@@ -301,7 +301,7 @@ public final class ServerConfiguration {
      * @return 密钥对类型
      */
     public String getKeypairType() {
-        return properties.getProperty(KEYPAIR_TYPE);
+        return properties.getProperty(KEYPAIR_TYPE).toLowerCase();
     }
 
     /**

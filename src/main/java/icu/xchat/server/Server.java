@@ -25,7 +25,7 @@ public final class Server {
         configuration = ServerConfiguration.load();
         // TODO: 2022/1/4  
         LOGGER.info("初始化数据库...");
-        DataBase.initDataBase(configuration.getDbType().toLowerCase());
+        DataBase.initDataBase(configuration.getDbType());
         LOGGER.info("数据库初始化完毕");
         LOGGER.info("初始化公共线程池...");
         PublicThreadPool.init(configuration.getThreadPoolSize());
