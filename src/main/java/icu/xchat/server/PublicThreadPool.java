@@ -3,7 +3,9 @@ package icu.xchat.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 公共线程池
@@ -13,7 +15,7 @@ import java.util.concurrent.*;
 public class PublicThreadPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(PublicThreadPool.class);
     private static final int MAX_WORK_COUNT = 1024;
-    private static final String THREAD_NAME = "PublicThread";
+    private static final String THREAD_NAME = "worker-public-thread";
     private static ThreadPoolExecutor executor;
     private static volatile int threadNum = 0;
 
@@ -22,7 +24,11 @@ public class PublicThreadPool {
      *
      * @param threadCount 线程数量
      */
-    protected static void init(int threadCount) {
+    public static synchronized void init(int threadCount) {
+        if (executor != null) {
+            LOGGER.warn("线程池重复初始化！");
+            return;
+        }
         executor = new ThreadPoolExecutor(threadCount, threadCount, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(MAX_WORK_COUNT), runnable -> {
             Thread thread = new Thread(runnable);
@@ -34,6 +40,7 @@ public class PublicThreadPool {
         }, new ThreadPoolExecutor.CallerRunsPolicy() {
             @Override
             public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                // TODO: 2022/1/7
                 LOGGER.warn("公共线程池任务数已满！");
                 super.rejectedExecution(r, e);
             }
@@ -47,5 +54,14 @@ public class PublicThreadPool {
      */
     public static void execute(Runnable runnable) {
         executor.execute(runnable);
+    }
+
+    /**
+     * 获取线程池
+     *
+     * @return 线程池
+     */
+    public static ThreadPoolExecutor getExecutor() {
+        return executor;
     }
 }

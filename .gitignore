@@ -4,3 +4,4 @@ logs
 .idea
 xchat-server.conf
 xchat-server.db
+xchat-server.key

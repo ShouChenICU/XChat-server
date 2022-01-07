@@ -16,18 +16,18 @@ import java.util.Properties;
 public final class ServerConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerConfiguration.class);
     private static final String CONF_FILE_NAME = "xchat-server.conf";
-    private static final String SERVER_HOST = "server-host";
-    private static final String SERVER_PORT = "server-port";
+    private static final String SERVER_HOST = "server.host";
+    private static final String SERVER_PORT = "server.port";
     private static final String DEFAULT_PORT = "41321";
     private static final String PUBLIC_THREAD_POLL_SIZE = "thread-pool-size";
-    private static final String DB_TYPE = "db-type";
+    private static final String DB_TYPE = "db.type";
     private static final String DB_TYPE_DEFAULT = DataBase.DB_TYPE_SQLITE;
-    private static final String DB_URL = "db-url";
-    private static final String DB_USERNAME = "db-username";
-    private static final String DB_PASSWORD = "db-password";
-    private static final String KEYPAIR_TYPE = "keypair-type";
+    private static final String DB_URL = "db.url";
+    private static final String DB_USERNAME = "db.username";
+    private static final String DB_PASSWORD = "db.password";
+    private static final String KEYPAIR_TYPE = "keypair.type";
     private static final String KEYPAIR_TYPE_DEFAULT = ServerKeyPairTool.KEYPAIR_RSA;
-    private static final String KEYPAIR_SIZE = "keypair-size";
+    private static final String KEYPAIR_SIZE = "keypair.size";
     private static final String KEYPAIR_SIZE_DEFAULT = ServerKeyPairTool.KEYPAIR_SIZE_DEFAULT;
     private final Properties properties;
 

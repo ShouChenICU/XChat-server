@@ -5,8 +5,6 @@ import icu.xchat.server.net.NetCore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 /**
  * XChat服务端主类
  *
@@ -23,21 +21,19 @@ public final class Server {
     private static void initServer() throws Exception {
         LOGGER.info("初始化配置...");
         configuration = ServerConfiguration.load();
-        // TODO: 2022/1/4  
+        LOGGER.info("加载服务端密钥对...");
+        ServerKeyPairTool.loadKeyPair(configuration.getKeypairType());
+        LOGGER.info("密钥对加载完毕");
         LOGGER.info("初始化数据库...");
         DataBase.initDataBase(configuration.getDbType());
         LOGGER.info("数据库初始化完毕");
         LOGGER.info("初始化公共线程池...");
         PublicThreadPool.init(configuration.getThreadPoolSize());
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
-        try {
-            LOGGER.info("初始化网络...");
-            netCore = NetCore.getInstance();
-            LOGGER.info("网络初始化完毕");
-        } catch (IOException e) {
-            LOGGER.error("网络初始化失败！", e);
-            throw e;
-        }
+        LOGGER.info("初始化网络...");
+        netCore = NetCore.getInstance();
+        LOGGER.info("网络初始化完毕");
+        Runtime.getRuntime().addShutdownHook(new Thread(Server::stop));
     }
 
     /**
@@ -76,7 +72,7 @@ public final class Server {
             initServer();
             LOGGER.info("XChat-server初始化完毕！");
         } catch (Exception e) {
-            LOGGER.error("初始化失败！");
+            LOGGER.error("初始化失败！", e);
             System.exit(-1);
         }
     }

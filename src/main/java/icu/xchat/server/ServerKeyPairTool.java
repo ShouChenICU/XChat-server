@@ -9,6 +9,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.zip.DataFormatException;
 
 /**
  * 服务端密钥对工具类
@@ -53,10 +54,6 @@ public final class ServerKeyPairTool {
         }
     }
 
-    public static KeyPair getKeypair() {
-        return keypair;
-    }
-
     public static PublicKey getPublicKey() {
         return publicKey;
     }
@@ -86,7 +83,7 @@ public final class ServerKeyPairTool {
     /**
      * 加载密钥对
      */
-    public static synchronized void loadKeyPair(String keypairType) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static synchronized void loadKeyPair(String keypairType) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, DataFormatException {
         if (keypair != null) {
             LOGGER.warn("不能重复加载密钥！");
         }

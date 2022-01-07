@@ -22,7 +22,7 @@ public abstract class DataBase {
      * @param dbType 数据库类型
      */
     public static synchronized void initDataBase(String dbType) {
-        if (dataBase == null) {
+        if (dataBase != null) {
             LOGGER.warn("重复初始化数据库！");
             return;
         }

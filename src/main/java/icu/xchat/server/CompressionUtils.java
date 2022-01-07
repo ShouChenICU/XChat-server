@@ -74,26 +74,22 @@ public final class CompressionUtils {
      * @param data 待解压数据
      * @return 解压后的数据
      */
-    public static byte[] deCompress(byte[] data) {
+    public static byte[] deCompress(byte[] data) throws DataFormatException {
         Inflater inflater = getInflater();
         inflater.setInput(data);
         inflater.finished();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buf = new byte[16];
         int len;
-        try {
-            while (!inflater.finished()) {
-                len = inflater.inflate(buf);
-                outputStream.write(buf, 0, len);
-            }
-        } catch (DataFormatException e) {
-            e.printStackTrace();
+        while (!inflater.finished()) {
+            len = inflater.inflate(buf);
+            outputStream.write(buf, 0, len);
         }
         return outputStream.toByteArray();
     }
 
     /**
-     * 测试数据的压缩率
+     * 测试待数据的压缩率
      *
      * @param data 数据
      * @return 压缩率
