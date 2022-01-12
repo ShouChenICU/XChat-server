@@ -1,6 +1,6 @@
 package icu.xchat.server;
 
-import icu.xchat.server.database.DataBase;
+import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.net.NetCore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public final class Server {
         ServerKeyPairTool.loadKeyPair(configuration.getKeypairType());
         LOGGER.info("密钥对加载完毕");
         LOGGER.info("初始化数据库...");
-        DataBase.initDataBase(configuration.getDbType());
+        DataBaseManager.initDataBase(configuration.getDbType());
         LOGGER.info("数据库初始化完毕");
         LOGGER.info("初始化公共线程池...");
         PublicThreadPool.init(configuration.getThreadPoolSize());

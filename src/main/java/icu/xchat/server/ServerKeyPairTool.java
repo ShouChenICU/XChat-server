@@ -22,7 +22,7 @@ public final class ServerKeyPairTool {
     private static final String TIME_STAMP = "time-stamp";
     private static final String PUBLIC_KEY = "public-key";
     private static final String PRIVATE_KEY = "private-key";
-    public static final String KEYPAIR_RSA = "rsa";
+    public static final String KEYPAIR_RSA = "RSA";
     public static final String KEYPAIR_SIZE_DEFAULT = "4096";
     private static KeyPair keypair;
     private static PublicKey publicKey;
@@ -73,7 +73,7 @@ public final class ServerKeyPairTool {
             LOGGER.warn("已存在密钥文件！");
             return;
         }
-        if (KEYPAIR_RSA.equals(keyPairType)) {
+        if (KEYPAIR_RSA.equalsIgnoreCase(keyPairType)) {
             genRsaKeypair(keypairSize);
         } else {
             LOGGER.error("不支持的密钥对类型：" + keyPairType);

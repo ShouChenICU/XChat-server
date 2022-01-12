@@ -15,8 +15,8 @@ import java.util.Map;
 class DispatchCenter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DispatchCenter.class);
     private static volatile DispatchCenter dispatchCenter;
-    private Map<String, Client> onlineClientMap;
-    private Map<Integer, ChatRoom> chatRoomMap;
+    private final Map<String, Client> onlineClientMap;
+    private final Map<Integer, ChatRoom> chatRoomMap;
 
     /**
      * 获取单实例

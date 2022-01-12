@@ -1,6 +1,6 @@
 package icu.xchat.server;
 
-import icu.xchat.server.database.DataBase;
+import icu.xchat.server.database.DataBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public final class ServerConfiguration {
     private static final String DEFAULT_PORT = "41321";
     private static final String PUBLIC_THREAD_POLL_SIZE = "thread-pool-size";
     private static final String DB_TYPE = "db.type";
-    private static final String DB_TYPE_DEFAULT = DataBase.DB_TYPE_SQLITE;
+    private static final String DB_TYPE_DEFAULT = DataBaseManager.DB_TYPE_SQLITE;
     private static final String DB_URL = "db.url";
     private static final String DB_USERNAME = "db.username";
     private static final String DB_PASSWORD = "db.password";
@@ -96,10 +96,6 @@ public final class ServerConfiguration {
 
     private ServerConfiguration(Properties configuration) {
         this.properties = configuration;
-    }
-
-    public Properties getProperties() {
-        return properties;
     }
 
     /**
@@ -229,7 +225,7 @@ public final class ServerConfiguration {
      * @return 数据库类型
      */
     public String getDbType() {
-        return properties.getProperty(DB_TYPE, DB_TYPE_DEFAULT).toLowerCase();
+        return properties.getProperty(DB_TYPE, DB_TYPE_DEFAULT);
     }
 
     /**
@@ -301,7 +297,7 @@ public final class ServerConfiguration {
      * @return 密钥对类型
      */
     public String getKeypairType() {
-        return properties.getProperty(KEYPAIR_TYPE).toLowerCase();
+        return properties.getProperty(KEYPAIR_TYPE);
     }
 
     /**

@@ -12,7 +12,7 @@ import java.sql.SQLException;
  *
  * @author shouchen
  */
-class DataBaseForSQLite extends DataBase {
+class DataBaseForSQLite implements DataBase {
     private SQLiteDataSource sqLiteDataSource;
 
     /**
@@ -23,7 +23,7 @@ class DataBaseForSQLite extends DataBase {
     }
 
     @Override
-    public void init() {
+    public void initDataBase() {
         SQLiteConfig config = new SQLiteConfig();
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setJournalMode(SQLiteConfig.JournalMode.TRUNCATE);
@@ -36,7 +36,7 @@ class DataBaseForSQLite extends DataBase {
     }
 
     @Override
-    public Connection getConnection0() throws SQLException {
+    public Connection getConnection() throws SQLException {
         return sqLiteDataSource.getConnection();
     }
 }
