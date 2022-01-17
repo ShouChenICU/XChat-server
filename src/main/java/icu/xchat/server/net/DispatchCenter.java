@@ -1,6 +1,6 @@
 package icu.xchat.server.net;
 
-import icu.xchat.server.entity.ChatRoom;
+import icu.xchat.server.database.entity.ChatRoomEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ class DispatchCenter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DispatchCenter.class);
     private static volatile DispatchCenter dispatchCenter;
     private final Map<String, Client> onlineClientMap;
-    private final Map<Integer, ChatRoom> chatRoomMap;
+    private final Map<Integer, ChatRoomEntity> chatRoomMap;
 
     /**
      * 获取单实例

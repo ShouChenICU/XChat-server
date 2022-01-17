@@ -21,22 +21,26 @@ public abstract class DataBaseManager {
      *
      * @param dbType 数据库类型
      */
-    public static synchronized void initDataBase(String dbType) {
+    public static synchronized void initDataBase(String dbType, String username, String password, String url) {
         if (dataBase != null) {
             LOGGER.warn("重复初始化数据库！");
             return;
         }
         if (DB_TYPE_SQLITE.equalsIgnoreCase(dbType)) {
-            initSQLite();
+            initSQLite(username, password, url);
         }
     }
 
     /**
      * 初始化SQLite数据库
      */
-    private static void initSQLite() {
+    private static void initSQLite(String username, String password, String url) {
         dataBase = new DataBaseForSQLite();
-        dataBase.initDataBase();
+        dataBase.initDataBase(username, password, url);
+    }
+
+    public static DataBase getDataBase() {
+        return dataBase;
     }
 
     public static Connection getConnection() throws SQLException {

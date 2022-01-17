@@ -1,5 +1,6 @@
-package icu.xchat.server;
+package icu.xchat.server.configurations;
 
+import icu.xchat.server.ServerKeyPairTool;
 import icu.xchat.server.database.DataBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,15 +55,15 @@ public final class ServerConfiguration {
      */
     private static ServerConfiguration generateDefault() {
         ServerConfiguration configuration = new ServerConfiguration(new Properties());
-        configuration.setServerHost("");
-        configuration.setServerPort(Integer.parseInt(DEFAULT_PORT));
-        configuration.setThreadPoolSize(Runtime.getRuntime().availableProcessors());
-        configuration.setDbType(DB_TYPE_DEFAULT);
-        configuration.setDbUrl("jdbc:sqlite:xchat-server.db");
-        configuration.setDbUsername("");
-        configuration.setDbPassword("");
-        configuration.setKeypairType(KEYPAIR_TYPE_DEFAULT);
-        configuration.setKeypairSize(Integer.parseInt(KEYPAIR_SIZE_DEFAULT));
+        configuration.setServerHost("")
+                .setServerPort(Integer.parseInt(DEFAULT_PORT))
+                .setThreadPoolSize(Runtime.getRuntime().availableProcessors())
+                .setDbType(DB_TYPE_DEFAULT)
+                .setDbUrl("jdbc:sqlite:xchat-server.db")
+                .setDbUsername("")
+                .setDbPassword("")
+                .setKeypairType(KEYPAIR_TYPE_DEFAULT)
+                .setKeypairSize(Integer.parseInt(KEYPAIR_SIZE_DEFAULT));
         return configuration;
     }
 
@@ -133,8 +134,9 @@ public final class ServerConfiguration {
      *
      * @param host 主机名
      */
-    public void setServerHost(String host) {
+    public ServerConfiguration setServerHost(String host) {
         properties.setProperty(SERVER_HOST, host);
+        return this;
     }
 
     /**
@@ -151,11 +153,12 @@ public final class ServerConfiguration {
      *
      * @param port 端口
      */
-    public void setServerPort(int port) {
+    public ServerConfiguration setServerPort(int port) {
         if (port < 1 || port > 65535) {
             port = Integer.parseInt(DEFAULT_PORT);
         }
         properties.setProperty(SERVER_PORT, String.valueOf(port));
+        return this;
     }
 
     /**
@@ -183,11 +186,12 @@ public final class ServerConfiguration {
      *
      * @param size 线程池大小
      */
-    public void setThreadPoolSize(int size) {
+    public ServerConfiguration setThreadPoolSize(int size) {
         if (size < 1) {
             size = 1;
         }
         properties.setProperty(PUBLIC_THREAD_POLL_SIZE, String.valueOf(size));
+        return this;
     }
 
     /**
@@ -215,8 +219,9 @@ public final class ServerConfiguration {
      *
      * @param dbType 数据库类型
      */
-    public void setDbType(String dbType) {
+    public ServerConfiguration setDbType(String dbType) {
         properties.setProperty(DB_TYPE, dbType);
+        return this;
     }
 
     /**
@@ -233,8 +238,9 @@ public final class ServerConfiguration {
      *
      * @param url JDBC地址
      */
-    public void setDbUrl(String url) {
+    public ServerConfiguration setDbUrl(String url) {
         properties.setProperty(DB_URL, url);
+        return this;
     }
 
     /**
@@ -251,8 +257,9 @@ public final class ServerConfiguration {
      *
      * @param username 用户名
      */
-    public void setDbUsername(String username) {
+    public ServerConfiguration setDbUsername(String username) {
         properties.setProperty(DB_USERNAME, username);
+        return this;
     }
 
     /**
@@ -269,8 +276,9 @@ public final class ServerConfiguration {
      *
      * @param password 密码
      */
-    public void setDbPassword(String password) {
+    public ServerConfiguration setDbPassword(String password) {
         properties.setProperty(DB_PASSWORD, password);
+        return this;
     }
 
     /**
@@ -287,8 +295,9 @@ public final class ServerConfiguration {
      *
      * @param keypairType 密钥对类型
      */
-    public void setKeypairType(String keypairType) {
+    public ServerConfiguration setKeypairType(String keypairType) {
         properties.setProperty(KEYPAIR_TYPE, keypairType);
+        return this;
     }
 
     /**
@@ -305,8 +314,9 @@ public final class ServerConfiguration {
      *
      * @param keypairSize 密钥对长度
      */
-    public void setKeypairSize(int keypairSize) {
+    public ServerConfiguration setKeypairSize(int keypairSize) {
         properties.setProperty(KEYPAIR_SIZE, String.valueOf(keypairSize));
+        return this;
     }
 
     /**

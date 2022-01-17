@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 04/01/2022 21:39:53
+ Date: 17/01/2022 19:31:02
 */
 
 PRAGMA foreign_keys = false;
@@ -20,14 +20,26 @@ PRAGMA foreign_keys = false;
 -- ----------------------------
 DROP TABLE IF EXISTS "r_members";
 CREATE TABLE "r_members" (
-  "rid" integer NOT NULL,
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "room_id" integer NOT NULL,
   "uid_code" text NOT NULL,
-  "role" integer NOT NULL DEFAULT 0,
-  "permission" integer NOT NULL,
+  "role" text NOT NULL DEFAULT '',
   "join_time" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("rid", "uid_code"),
-  CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ----------------------------
+-- Table structure for r_room_files
+-- ----------------------------
+DROP TABLE IF EXISTS "r_room_files";
+CREATE TABLE "r_room_files" (
+  "room_id" integer NOT NULL,
+  "file_id" integer NOT NULL,
+  "create_time" integer NOT NULL DEFAULT 0,
+  PRIMARY KEY ("room_id", "file_id"),
+  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "file_id" FOREIGN KEY ("file_id") REFERENCES "t_files" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -36,11 +48,13 @@ CREATE TABLE "r_members" (
 DROP TABLE IF EXISTS "r_title_own";
 CREATE TABLE "r_title_own" (
   "tid" integer NOT NULL,
-  "uid_code" text NOT NULL,
-  "creation_time" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("tid", "uid_code"),
+  "uid" integer NOT NULL,
+  "img_file_id" integer DEFAULT 0,
+  "creation_time" integer NOT NULL,
+  PRIMARY KEY ("tid", "uid"),
   CONSTRAINT "tid" FOREIGN KEY ("tid") REFERENCES "t_titles" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "img_file_id" FOREIGN KEY ("img_file_id") REFERENCES "t_files" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -50,18 +64,43 @@ DROP TABLE IF EXISTS "sqlite_sequence";
 CREATE TABLE sqlite_sequence(name,seq);
 
 -- ----------------------------
+-- Table structure for t_files
+-- ----------------------------
+DROP TABLE IF EXISTS "t_files";
+CREATE TABLE "t_files" (
+  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" text NOT NULL,
+  "size" integer NOT NULL DEFAULT 0,
+  "type" text NOT NULL DEFAULT '',
+  "status" integer NOT NULL DEFAULT 0,
+  "hash" text NOT NULL DEFAULT '',
+  "create_time" integer NOT NULL DEFAULT 0
+);
+
+-- ----------------------------
 -- Table structure for t_mails
 -- ----------------------------
 DROP TABLE IF EXISTS "t_mails";
 CREATE TABLE "t_mails" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "sender" text NOT NULL,
-  "receiver" text NOT NULL,
+  "sender_id" integer NOT NULL,
+  "receiver_id" integer NOT NULL,
   "theme" text NOT NULL DEFAULT '',
   "content" text NOT NULL DEFAULT '',
   "creation_time" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "sender" FOREIGN KEY ("sender") REFERENCES "t_users" ("uid_code") ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT "receiver" FOREIGN KEY ("receiver") REFERENCES "t_users" ("uid_code") ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT "sender_id" FOREIGN KEY ("sender_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT "receiver_id" FOREIGN KEY ("receiver_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+-- ----------------------------
+-- Table structure for t_mem_permissions
+-- ----------------------------
+DROP TABLE IF EXISTS "t_mem_permissions";
+CREATE TABLE "t_mem_permissions" (
+  "member_id" integer NOT NULL,
+  "permission" text NOT NULL DEFAULT '',
+  PRIMARY KEY ("member_id"),
+  CONSTRAINT "member_id" FOREIGN KEY ("member_id") REFERENCES "r_members" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -70,13 +109,13 @@ CREATE TABLE "t_mails" (
 DROP TABLE IF EXISTS "t_messages";
 CREATE TABLE "t_messages" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "sender" text NOT NULL,
+  "sender_id" integer NOT NULL,
   "rid" integer NOT NULL,
   "type" text NOT NULL,
   "content" text NOT NULL,
   "delete_mark" integer NOT NULL DEFAULT 0,
   "time_stamp" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "uid_code" FOREIGN KEY ("sender") REFERENCES "t_users" ("uid_code") ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT "sender_id" FOREIGN KEY ("sender_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -108,10 +147,10 @@ CREATE TABLE "t_titles" (
 DROP TABLE IF EXISTS "t_user_attributes";
 CREATE TABLE "t_user_attributes" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "uid_code" text NOT NULL,
+  "uid" integer NOT NULL,
   "key" text NOT NULL,
   "value" text NOT NULL,
-  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -119,16 +158,22 @@ CREATE TABLE "t_user_attributes" (
 -- ----------------------------
 DROP TABLE IF EXISTS "t_users";
 CREATE TABLE "t_users" (
+  "uid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "uid_code" text NOT NULL,
   "nick" text NOT NULL,
-  "tid" integer NOT NULL DEFAULT 0,
   "level" integer NOT NULL DEFAULT 0,
   "exp" integer NOT NULL DEFAULT 0,
   "status" integer NOT NULL DEFAULT 0,
-  "time_stamp" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("uid_code"),
-  CONSTRAINT "tid" FOREIGN KEY ("tid") REFERENCES "t_titles" ("id") ON DELETE SET DEFAULT ON UPDATE CASCADE
+  "time_stamp" integer NOT NULL DEFAULT 0
 );
+
+-- ----------------------------
+-- Auto increment value for r_members
+-- ----------------------------
+
+-- ----------------------------
+-- Auto increment value for t_files
+-- ----------------------------
 
 -- ----------------------------
 -- Auto increment value for t_mails
@@ -145,9 +190,15 @@ CREATE TABLE "t_users" (
 -- ----------------------------
 -- Auto increment value for t_titles
 -- ----------------------------
+UPDATE "main"."sqlite_sequence" SET seq = 1 WHERE name = 't_titles';
 
 -- ----------------------------
 -- Auto increment value for t_user_attributes
 -- ----------------------------
+
+-- ----------------------------
+-- Auto increment value for t_users
+-- ----------------------------
+UPDATE "main"."sqlite_sequence" SET seq = 1 WHERE name = 't_users';
 
 PRAGMA foreign_keys = true;

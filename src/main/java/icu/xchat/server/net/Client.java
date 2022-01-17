@@ -1,6 +1,6 @@
 package icu.xchat.server.net;
 
-import icu.xchat.server.entity.User;
+import icu.xchat.server.database.entity.UserEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +11,8 @@ import java.util.Map;
  * @author shouchen
  */
 class Client {
-    private User user;
-    private Map<Integer, Task> taskMap;
+    private UserEntity userEntity;
+    private final Map<Integer, Task> taskMap;
 
     public Client() {
         taskMap = new HashMap<>();

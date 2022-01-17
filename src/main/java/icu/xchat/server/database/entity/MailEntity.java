@@ -1,11 +1,11 @@
-package icu.xchat.server.entity;
+package icu.xchat.server.database.entity;
 
 /**
  * 邮件实体类
  *
  * @author shouchen
  */
-public class Mail {
+public class MailEntity {
     private int id;
     private String sender;
     private String receiver;

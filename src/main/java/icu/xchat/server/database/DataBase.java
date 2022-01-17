@@ -1,5 +1,6 @@
 package icu.xchat.server.database;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -10,7 +11,9 @@ import java.sql.SQLException;
  */
 public interface DataBase {
 
-    void initDataBase();
+    void initDataBase(String username, String password, String url);
 
     Connection getConnection() throws SQLException;
+
+    DataSource getDataSource();
 }

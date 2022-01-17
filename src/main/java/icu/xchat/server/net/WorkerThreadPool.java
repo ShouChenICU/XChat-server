@@ -1,4 +1,4 @@
-package icu.xchat.server;
+package icu.xchat.server.net;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,19 +8,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 公共线程池
+ * 任务线程池
  *
  * @author shouchen
  */
-public class PublicThreadPool {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PublicThreadPool.class);
+public class WorkerThreadPool {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPool.class);
     private static final int MAX_WORK_COUNT = 1024;
     private static final String THREAD_NAME = "worker-public-thread";
     private static ThreadPoolExecutor executor;
     private static volatile int threadNum = 0;
 
     /**
-     * 初始化公共线程池
+     * 初始化任务线程池
      *
      * @param threadCount 线程数量
      */
@@ -32,7 +32,7 @@ public class PublicThreadPool {
         executor = new ThreadPoolExecutor(threadCount, threadCount, 0, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(MAX_WORK_COUNT), runnable -> {
             Thread thread = new Thread(runnable);
-            synchronized (PublicThreadPool.class) {
+            synchronized (WorkerThreadPool.class) {
                 thread.setName(THREAD_NAME + "-" + threadNum++);
             }
             thread.setDaemon(true);

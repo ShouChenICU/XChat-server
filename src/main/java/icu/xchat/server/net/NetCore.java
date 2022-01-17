@@ -15,9 +15,9 @@ import java.nio.channels.ServerSocketChannel;
 public class NetCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetCore.class);
     private static volatile NetCore netCore;
-    private ServerSocketChannel serverSocketChannel;
-    private Selector mainSelector;
-    private DispatchCenter dispatchCenter;
+    private final ServerSocketChannel serverSocketChannel;
+    private final Selector mainSelector;
+    private final DispatchCenter dispatchCenter;
     private boolean isRun;
 
     /**

@@ -1,4 +1,4 @@
-package icu.xchat.server.entity;
+package icu.xchat.server.database.entity;
 
 import java.util.Objects;
 
@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * @author shouchen
  */
-public class Member {
+public class MemberEntity {
     public static final int ROLE_DEFAULT = 0;
     public static final int ROLE_ADMIN = 1;
     public static final int ROLE_OWNER = 2;
@@ -20,7 +20,7 @@ public class Member {
     private int permission;
     private long joinTime;
 
-    public Member() {
+    public MemberEntity() {
     }
 
     public int getRid() {
@@ -71,8 +71,8 @@ public class Member {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Member member = (Member) o;
-        return rid == member.rid && Objects.equals(uidCode, member.uidCode);
+        MemberEntity memberEntity = (MemberEntity) o;
+        return rid == memberEntity.rid && Objects.equals(uidCode, memberEntity.uidCode);
     }
 
     @Override

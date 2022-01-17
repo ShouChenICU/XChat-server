@@ -1,4 +1,4 @@
-package icu.xchat.server.entity;
+package icu.xchat.server.database.entity;
 
 /**
  * 消息实体类

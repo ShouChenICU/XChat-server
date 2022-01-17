@@ -1,9 +1,9 @@
 package icu.xchat.server.database;
 
-import icu.xchat.server.Server;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -23,7 +23,7 @@ class DataBaseForSQLite implements DataBase {
     }
 
     @Override
-    public void initDataBase() {
+    public void initDataBase(String username, String password, String url) {
         SQLiteConfig config = new SQLiteConfig();
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setJournalMode(SQLiteConfig.JournalMode.TRUNCATE);
@@ -31,12 +31,17 @@ class DataBaseForSQLite implements DataBase {
         config.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
         config.enforceForeignKeys(true);
         sqLiteDataSource = new SQLiteDataSource(config);
-        sqLiteDataSource.setUrl(Server.getConfiguration().getDbUrl());
+        sqLiteDataSource.setUrl(url);
         initSchema();
     }
 
     @Override
     public Connection getConnection() throws SQLException {
         return sqLiteDataSource.getConnection();
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return sqLiteDataSource;
     }
 }
