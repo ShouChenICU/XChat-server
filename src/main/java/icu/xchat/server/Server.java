@@ -24,7 +24,7 @@ public final class Server {
         LOGGER.info("初始化配置...");
         configuration = ServerConfiguration.load();
         LOGGER.info("加载服务端密钥对...");
-        ServerKeyPairTool.loadKeyPair(configuration.getKeypairType());
+        SecurityKeyPairTool.loadKeyPair(configuration.getKeypairAlgorithm());
         LOGGER.info("密钥对加载完毕");
         LOGGER.info("初始化数据库...");
         DataBaseManager.initDataBase(configuration.getDbType(), configuration.getDbUsername(), configuration.getDbPassword(), configuration.getDbUrl());

@@ -1,7 +1,6 @@
-package icu.xchat.server;
+package icu.xchat.server.utils;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -13,9 +12,9 @@ import java.util.zip.Inflater;
  * @author shouchen
  */
 public final class CompressionUtils {
-    private static final int LEVEL = 9;
-    private static final Map<Long, Deflater> DEFLATER_MAP = new ConcurrentHashMap<>();
-    private static final Map<Long, Inflater> INFLATER_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Deflater> DEFLATER_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, Inflater> INFLATER_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, ByteArrayOutputStream> OUTPUT_STREAM_MAP = new ConcurrentHashMap<>();
 
     /**
      * 获取压缩器
@@ -26,9 +25,10 @@ public final class CompressionUtils {
         long id = Thread.currentThread().getId();
         Deflater deflater = DEFLATER_MAP.get(id);
         if (deflater == null) {
-            deflater = new Deflater(LEVEL);
+            deflater = new Deflater(Deflater.BEST_COMPRESSION);
             DEFLATER_MAP.put(id, deflater);
         }
+        deflater.reset();
         return deflater;
     }
 
@@ -44,7 +44,19 @@ public final class CompressionUtils {
             inflater = new Inflater();
             INFLATER_MAP.put(id, inflater);
         }
+        inflater.reset();
         return inflater;
+    }
+
+    private static ByteArrayOutputStream getOutputStream() {
+        long id = Thread.currentThread().getId();
+        ByteArrayOutputStream outputStream = OUTPUT_STREAM_MAP.get(id);
+        if (outputStream == null) {
+            outputStream = new ByteArrayOutputStream();
+            OUTPUT_STREAM_MAP.put(id, outputStream);
+        }
+        outputStream.reset();
+        return outputStream;
     }
 
     /**
@@ -57,14 +69,13 @@ public final class CompressionUtils {
         Deflater deflater = getDeflater();
         deflater.setInput(data);
         deflater.finish();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream outputStream = getOutputStream();
         byte[] buf = new byte[16];
         int len;
         while (!deflater.finished()) {
             len = deflater.deflate(buf);
             outputStream.write(buf, 0, len);
         }
-        deflater.reset();
         return outputStream.toByteArray();
     }
 
@@ -77,8 +88,7 @@ public final class CompressionUtils {
     public static byte[] deCompress(byte[] data) throws DataFormatException {
         Inflater inflater = getInflater();
         inflater.setInput(data);
-        inflater.finished();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream outputStream = getOutputStream();
         byte[] buf = new byte[16];
         int len;
         while (!inflater.finished()) {

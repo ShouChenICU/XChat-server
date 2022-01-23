@@ -1,6 +1,6 @@
 package icu.xchat.server.configurations;
 
-import icu.xchat.server.ServerKeyPairTool;
+import icu.xchat.server.SecurityKeyPairTool;
 import icu.xchat.server.database.DataBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,16 +20,16 @@ public final class ServerConfiguration {
     private static final String SERVER_HOST = "server.host";
     private static final String SERVER_PORT = "server.port";
     private static final String DEFAULT_PORT = "41321";
-    private static final String PUBLIC_THREAD_POLL_SIZE = "thread-pool-size";
-    private static final String DB_TYPE = "db.type";
+    private static final String WORKER_THREAD_POLL_SIZE = "thread-pool-size";
+    private static final String DB_TYPE = "database.type";
     private static final String DB_TYPE_DEFAULT = DataBaseManager.DB_TYPE_SQLITE;
-    private static final String DB_URL = "db.url";
-    private static final String DB_USERNAME = "db.username";
-    private static final String DB_PASSWORD = "db.password";
-    private static final String KEYPAIR_TYPE = "keypair.type";
-    private static final String KEYPAIR_TYPE_DEFAULT = ServerKeyPairTool.KEYPAIR_RSA;
+    private static final String DB_URL = "database.url";
+    private static final String DB_USERNAME = "database.username";
+    private static final String DB_PASSWORD = "database.password";
+    private static final String KEYPAIR_ALGORITHM = "keypair.algorithm";
+    private static final String KEYPAIR_ALGORITHM_DEFAULT = SecurityKeyPairTool.KEYPAIR_ALGORITHM_RSA;
     private static final String KEYPAIR_SIZE = "keypair.size";
-    private static final String KEYPAIR_SIZE_DEFAULT = ServerKeyPairTool.KEYPAIR_SIZE_DEFAULT;
+    private static final String KEYPAIR_SIZE_DEFAULT = String.valueOf(SecurityKeyPairTool.KEYPAIR_SIZE_DEFAULT);
     private final Properties properties;
 
     /**
@@ -62,7 +62,7 @@ public final class ServerConfiguration {
                 .setDbUrl("jdbc:sqlite:xchat-server.db")
                 .setDbUsername("")
                 .setDbPassword("")
-                .setKeypairType(KEYPAIR_TYPE_DEFAULT)
+                .setKeypairType(KEYPAIR_ALGORITHM_DEFAULT)
                 .setKeypairSize(Integer.parseInt(KEYPAIR_SIZE_DEFAULT));
         return configuration;
     }
@@ -92,7 +92,7 @@ public final class ServerConfiguration {
         }
         LOGGER.info("生成默认配置成功！");
         LOGGER.info("请重新启动XChat-server！");
-        throw new Exception();
+        throw new Exception("");
     }
 
     private ServerConfiguration(Properties configuration) {
@@ -112,7 +112,7 @@ public final class ServerConfiguration {
             writer.write("# 服务端网络端口\n");
             writer.write(SERVER_PORT + "=" + getServerPort() + "\n\n");
             writer.write("# 任务线程池大小\n");
-            writer.write(PUBLIC_THREAD_POLL_SIZE + "=" + getThreadPoolSize() + "\n\n");
+            writer.write(WORKER_THREAD_POLL_SIZE + "=" + getThreadPoolSize() + "\n\n");
             writer.write("# 数据库类型（当前仅支持SQLite）\n");
             writer.write(DB_TYPE + "=" + getDbType() + "\n\n");
             writer.write("# JDBC链接地址\n");
@@ -122,7 +122,7 @@ public final class ServerConfiguration {
             writer.write("# 数据库密码\n");
             writer.write(DB_PASSWORD + "=" + getDbPassword() + "\n\n");
             writer.write("# 服务端密钥对类型（当前仅支持RSA）\n");
-            writer.write(KEYPAIR_TYPE + "=" + getKeypairType() + "\n\n");
+            writer.write(KEYPAIR_ALGORITHM + "=" + getKeypairAlgorithm() + "\n\n");
             writer.write("# 服务端密钥对长度\n");
             writer.write(KEYPAIR_SIZE + "=" + getKeypairSize());
             writer.flush();
@@ -190,7 +190,7 @@ public final class ServerConfiguration {
         if (size < 1) {
             size = 1;
         }
-        properties.setProperty(PUBLIC_THREAD_POLL_SIZE, String.valueOf(size));
+        properties.setProperty(WORKER_THREAD_POLL_SIZE, String.valueOf(size));
         return this;
     }
 
@@ -202,7 +202,7 @@ public final class ServerConfiguration {
     public int getThreadPoolSize() {
         int size;
         try {
-            size = Integer.parseInt(properties.getProperty(PUBLIC_THREAD_POLL_SIZE));
+            size = Integer.parseInt(properties.getProperty(WORKER_THREAD_POLL_SIZE));
             if (size < 1) {
                 LOGGER.warn("配置的线程数小于1,将使用默认设置！");
                 size = 1;
@@ -296,7 +296,7 @@ public final class ServerConfiguration {
      * @param keypairType 密钥对类型
      */
     public ServerConfiguration setKeypairType(String keypairType) {
-        properties.setProperty(KEYPAIR_TYPE, keypairType);
+        properties.setProperty(KEYPAIR_ALGORITHM, keypairType);
         return this;
     }
 
@@ -305,8 +305,8 @@ public final class ServerConfiguration {
      *
      * @return 密钥对类型
      */
-    public String getKeypairType() {
-        return properties.getProperty(KEYPAIR_TYPE);
+    public String getKeypairAlgorithm() {
+        return properties.getProperty(KEYPAIR_ALGORITHM);
     }
 
     /**
