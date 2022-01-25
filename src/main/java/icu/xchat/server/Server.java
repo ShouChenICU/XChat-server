@@ -48,15 +48,6 @@ public final class Server {
     }
 
     /**
-     * 获取网络核心
-     *
-     * @return 网络核心
-     */
-    public static NetCore getNetCore() {
-        return netCore;
-    }
-
-    /**
      * 打印标题信息
      */
     private static void printHeadline() {
@@ -77,13 +68,14 @@ public final class Server {
             LOGGER.error("初始化失败！", e);
             System.exit(-1);
         }
+        netCore.mainLoop();
     }
 
     /**
      * 停止服务端
      */
     public static void stop() {
-        LOGGER.info("开始停止XChat-server...");
+        LOGGER.info("停止XChat-server...");
         netCore.stop();
     }
 }

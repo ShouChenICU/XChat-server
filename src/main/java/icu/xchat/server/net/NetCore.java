@@ -46,13 +46,14 @@ public class NetCore {
     /**
      * 主轮询
      */
-    private void mainLoop() {
+    public void mainLoop() {
         while (isRun) {
             // TODO: 2022/1/4
         }
     }
 
     public void stop() {
+        // TODO: 2022/1/25
         isRun = false;
         try {
             serverSocketChannel.close();
