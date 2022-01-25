@@ -1,6 +1,6 @@
 package icu.xchat.server.net;
 
-import icu.xchat.server.database.entity.ChatRoomEntity;
+import icu.xchat.server.database.entities.ChatRoomEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

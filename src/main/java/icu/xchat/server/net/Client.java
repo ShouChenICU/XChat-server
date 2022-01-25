@@ -1,6 +1,6 @@
 package icu.xchat.server.net;
 
-import icu.xchat.server.database.entity.UserEntity;
+import icu.xchat.server.database.entities.UserEntity;
 
 import java.util.HashMap;
 import java.util.Map;

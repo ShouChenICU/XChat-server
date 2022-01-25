@@ -11,7 +11,7 @@ import java.sql.SQLException;
  *
  * @author shouchen
  */
-public abstract class DataBaseManager {
+public final class DataBaseManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseManager.class);
     public static final String DB_TYPE_SQLITE = "SQLite";
     private static DataBase dataBase;

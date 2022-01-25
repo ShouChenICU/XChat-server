@@ -41,7 +41,7 @@ public class WorkerThreadPool {
             @Override
             public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
                 // TODO: 2022/1/7
-                LOGGER.warn("公共线程池任务数已满！");
+                LOGGER.warn("任务线程池任务数已满！");
                 super.rejectedExecution(r, e);
             }
         });

@@ -1,4 +1,4 @@
-package icu.xchat.server.database.entity;
+package icu.xchat.server.database.entities;
 
 import java.util.Objects;
 
@@ -17,18 +17,6 @@ public class UserEntity {
      */
     private String uidCode;
     /**
-     * 用户昵称
-     */
-    private String nick;
-    /**
-     * 称号id
-     */
-    private Integer tid;
-    /**
-     * 用户等级
-     */
-    private Integer level;
-    /**
      * 经验
      */
     private Integer exp;
@@ -40,9 +28,6 @@ public class UserEntity {
      * 修改时间
      */
     private Long timeStamp;
-
-    public UserEntity() {
-    }
 
     public Integer getUid() {
         return uid;
@@ -59,33 +44,6 @@ public class UserEntity {
 
     public UserEntity setUidCode(String uidCode) {
         this.uidCode = uidCode;
-        return this;
-    }
-
-    public String getNick() {
-        return nick;
-    }
-
-    public UserEntity setNick(String nick) {
-        this.nick = nick;
-        return this;
-    }
-
-    public Integer getTid() {
-        return tid;
-    }
-
-    public UserEntity setTid(Integer tid) {
-        this.tid = tid;
-        return this;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public UserEntity setLevel(Integer level) {
-        this.level = level;
         return this;
     }
 
@@ -121,12 +79,12 @@ public class UserEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return uid.equals(that.uid) && uidCode.equals(that.uidCode);
+        return Objects.equals(uid, that.uid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, uidCode);
+        return Objects.hash(uid);
     }
 
     @Override
@@ -134,9 +92,6 @@ public class UserEntity {
         return "UserEntity{" +
                 "uid=" + uid +
                 ", uidCode='" + uidCode + '\'' +
-                ", nick='" + nick + '\'' +
-                ", tid=" + tid +
-                ", level=" + level +
                 ", exp=" + exp +
                 ", status=" + status +
                 ", timeStamp=" + timeStamp +

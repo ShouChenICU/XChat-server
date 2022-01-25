@@ -1,4 +1,4 @@
 package icu.xchat.server.encrypt;
 
-public class EncryptUtils {
+public class EncryptCore {
 }
