@@ -29,7 +29,7 @@ public final class Server {
         LOGGER.info("初始化数据库...");
         DataBaseManager.initDataBase(configuration.getDbType(), configuration.getDbUsername(), configuration.getDbPassword(), configuration.getDbUrl());
         LOGGER.info("数据库初始化完毕");
-        LOGGER.info("初始化公共线程池...");
+        LOGGER.info("初始化任务线程池...");
         WorkerThreadPool.init(configuration.getThreadPoolSize());
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
         LOGGER.info("初始化网络...");
@@ -75,7 +75,13 @@ public final class Server {
      * 停止服务端
      */
     public static void stop() {
+        synchronized (Server.class) {
+            if (!netCore.isRun()) {
+                return;
+            }
+        }
         LOGGER.info("停止XChat-server...");
         netCore.stop();
+
     }
 }

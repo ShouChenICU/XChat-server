@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 
@@ -41,6 +42,16 @@ public class NetCore {
         mainSelector = Selector.open();
         dispatchCenter = DispatchCenter.getInstance();
 
+    }
+
+    /**
+     * 绑定服务端口
+     *
+     * @param port 端口
+     * @throws IOException IO异常
+     */
+    public void bindPort(int port) throws IOException {
+        serverSocketChannel.bind(new InetSocketAddress(port));
     }
 
     /**
