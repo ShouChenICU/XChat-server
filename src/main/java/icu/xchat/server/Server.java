@@ -34,6 +34,7 @@ public final class Server {
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
         LOGGER.info("初始化网络...");
         netCore = NetCore.getInstance();
+        netCore.bindPort(configuration.getServerPort());
         LOGGER.info("网络初始化完毕");
         Runtime.getRuntime().addShutdownHook(new Thread(Server::stop));
     }

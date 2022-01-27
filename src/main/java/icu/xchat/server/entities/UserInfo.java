@@ -17,6 +17,10 @@ public class UserInfo {
      */
     private Integer exp;
     /**
+     * 等级
+     */
+    private Integer level;
+    /**
      * 状态
      */
     private Integer status;

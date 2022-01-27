@@ -27,4 +27,8 @@ final class GlobalVariables {
      * 版本全称
      */
     public static String VERSION_STRING = MAJOR_VERSION + "." + MINOR_VERSION + "." + PATCH_VERSION + "-" + EDITION;
+    /**
+     * 通讯协议版本
+     */
+    public static Integer PROTOCOL_VERSION = 1;
 }

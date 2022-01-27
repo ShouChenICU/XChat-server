@@ -8,12 +8,6 @@ import java.util.Objects;
  * @author shouchen
  */
 public class MemberEntity {
-    public static final String ROLE_DEFAULT = "ROLE_DEFAULT";
-    public static final String ROLE_ADMIN = "ROLE_ADMIN";
-    public static final String ROLE_OWNER = "ROLE_OWNER";
-    public static final int PERMISSION_UTTER = 1;
-    public static final int PERMISSION_FILE_DOWNLOAD = 2;
-    public static final int PERMISSION_FILE_UPLOAD = 4;
     /**
      * 房间id
      */

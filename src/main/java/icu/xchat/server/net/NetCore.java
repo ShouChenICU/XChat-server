@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Set;
 
 /**
  * 网络核心
@@ -40,6 +43,7 @@ public class NetCore {
     private NetCore() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
         mainSelector = Selector.open();
+        serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
         dispatchCenter = DispatchCenter.getInstance();
 
     }
@@ -58,8 +62,29 @@ public class NetCore {
      * 主轮询
      */
     public void mainLoop() {
-        while (isRun) {
-            // TODO: 2022/1/4
+        Set<SelectionKey> selectionKeys = mainSelector.selectedKeys();
+        try {
+            while (isRun) {
+                mainSelector.select();
+                for (SelectionKey key : selectionKeys) {
+                    selectionKeys.remove(key);
+                    if (key.isReadable()) {
+                        // TODO: 2022/1/27
+                    } else if (key.isAcceptable()) {
+                        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                        SocketChannel channel = serverChannel.accept();
+                        WorkerThreadPool.execute(() -> {
+                            try {
+                                channel.register(mainSelector, SelectionKey.OP_READ, dispatchCenter.newClient(channel));
+                            } catch (IOException e) {
+                                LOGGER.warn("", e);
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("", e);
         }
     }
 
