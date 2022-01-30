@@ -26,7 +26,7 @@ public class CacheManager<K, V> {
     /**
      * 构造一个缓存管理器
      *
-     * @param liveTime 缓存有效时长 单位:毫秒
+     * @param liveTime 缓存有效时长 单位:毫秒 为0永不超时
      */
     public CacheManager(long liveTime) {
         this.liveTime = liveTime;
@@ -39,6 +39,9 @@ public class CacheManager<K, V> {
         scheduledThreadPoolExecutor.schedule(this::clearCacheLoop, 3, TimeUnit.MINUTES);
     }
 
+    /**
+     * 清理过时的Cache
+     */
     public void clearCache() {
         for (Map.Entry<K, Cache> entry : cacheMap.entrySet()) {
             if (entry.getValue().isExpire()) {
@@ -47,14 +50,36 @@ public class CacheManager<K, V> {
         }
     }
 
+    /**
+     * 获取一个Cache
+     *
+     * @param key key
+     * @return Cache
+     */
     public V getCache(K key) {
         Cache cache = cacheMap.get(key);
         return cache == null ? null : cache.getCache();
     }
 
+    /**
+     * 设置一个Cache
+     *
+     * @param key   key
+     * @param value value
+     * @return this
+     */
     public CacheManager<K, V> putCache(K key, V value) {
         cacheMap.put(key, new Cache(value));
         return this;
+    }
+
+    /**
+     * 移除一个Cache
+     *
+     * @param key key
+     */
+    public void removeCache(K key) {
+        cacheMap.remove(key);
     }
 
     private class Cache {
@@ -72,7 +97,7 @@ public class CacheManager<K, V> {
         }
 
         public boolean isExpire() {
-            return updateTime + liveTime < System.currentTimeMillis();
+            return liveTime != 0 && updateTime + liveTime < System.currentTimeMillis();
         }
     }
 }

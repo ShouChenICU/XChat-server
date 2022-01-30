@@ -1,4 +1,4 @@
-package icu.xchat.server;
+package icu.xchat.server.utils;
 
 import org.bson.*;
 import org.slf4j.Logger;

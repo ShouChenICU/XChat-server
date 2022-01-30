@@ -4,6 +4,7 @@ import icu.xchat.server.configurations.ServerConfiguration;
 import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.net.NetCore;
 import icu.xchat.server.net.WorkerThreadPool;
+import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,5 @@ public final class Server {
         }
         LOGGER.info("停止XChat-server...");
         netCore.stop();
-
     }
 }

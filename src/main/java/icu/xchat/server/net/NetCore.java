@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Set;
 
 /**
@@ -42,10 +39,11 @@ public class NetCore {
 
     private NetCore() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(false);
         mainSelector = Selector.open();
         serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
         dispatchCenter = DispatchCenter.getInstance();
-
+        isRun = true;
     }
 
     /**
@@ -63,45 +61,57 @@ public class NetCore {
      */
     public void mainLoop() {
         Set<SelectionKey> selectionKeys = mainSelector.selectedKeys();
-        try {
-            while (isRun) {
+        while (isRun) {
+            try {
                 mainSelector.select();
-                for (SelectionKey key : selectionKeys) {
-                    selectionKeys.remove(key);
-                    if (key.isReadable()) {
-                        // TODO: 2022/1/27
-                    } else if (key.isAcceptable()) {
+            } catch (IOException e) {
+                LOGGER.error(",", e);
+                return;
+            }
+            for (SelectionKey key : selectionKeys) {
+                selectionKeys.remove(key);
+                if (key.isReadable()) {
+                    Client client = (Client) key.attachment();
+                    key.cancel();
+                    WorkerThreadPool.execute(() -> {
+                        try {
+                            client.doRead();
+                        } catch (IOException e) {
+                            LOGGER.warn("", e);
+                            dispatchCenter.closeClient(client);
+                        }
+                    });
+                } else if (key.isAcceptable()) {
+                    try {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel channel = serverChannel.accept();
-                        WorkerThreadPool.execute(() -> {
-                            try {
-                                channel.register(mainSelector, SelectionKey.OP_READ, dispatchCenter.newClient(channel));
-                            } catch (IOException e) {
-                                LOGGER.warn("", e);
-                            }
-                        });
+                        channel.configureBlocking(false);
+                        SelectionKey selectionKey = channel.register(mainSelector, SelectionKey.OP_READ);
+                        Client client = dispatchCenter.newClient(selectionKey);
+                        selectionKey.attach(client);
+                    } catch (IOException e) {
+                        LOGGER.warn("", e);
                     }
                 }
             }
-        } catch (IOException e) {
-            LOGGER.error("", e);
         }
     }
 
+    public SelectionKey register(SocketChannel channel, int ops, Client client) throws ClosedChannelException {
+        SelectionKey selectionKey = channel.register(mainSelector, ops, client);
+        mainSelector.wakeup();
+        return selectionKey;
+    }
+
     public void stop() {
-        // TODO: 2022/1/25
         isRun = false;
         try {
+            mainSelector.close();
             serverSocketChannel.close();
         } catch (IOException e) {
-            LOGGER.error("服务端网络通道关闭失败！", e);
+            LOGGER.error("", e);
         }
         dispatchCenter.stop();
-        try {
-            mainSelector.close();
-        } catch (IOException e) {
-            LOGGER.error("主选择器关闭失败！", e);
-        }
     }
 
     public boolean isRun() {

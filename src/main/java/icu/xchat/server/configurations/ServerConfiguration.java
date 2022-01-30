@@ -1,7 +1,7 @@
 package icu.xchat.server.configurations;
 
-import icu.xchat.server.SecurityKeyPairTool;
 import icu.xchat.server.database.DataBaseManager;
+import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
