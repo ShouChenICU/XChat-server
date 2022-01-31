@@ -86,9 +86,7 @@ public class NetCore {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel channel = serverChannel.accept();
                         channel.configureBlocking(false);
-                        SelectionKey selectionKey = channel.register(mainSelector, SelectionKey.OP_READ);
-                        Client client = dispatchCenter.newClient(selectionKey);
-                        selectionKey.attach(client);
+                        dispatchCenter.newClient(channel);
                     } catch (IOException e) {
                         LOGGER.warn("", e);
                     }

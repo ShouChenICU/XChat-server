@@ -29,15 +29,15 @@ public class Client {
     private int packetLength;
     private byte[] packetData;
 
-    public Client(SelectionKey selectionKey) {
-        this.selectionKey = selectionKey;
-        this.channel = (SocketChannel) selectionKey.channel();
+    public Client(SocketChannel channel) throws IOException {
+        this.channel = channel;
         this.buffer = ByteBuffer.allocateDirect(256);
         this.taskMap = new HashMap<>();
         this.userInfo = null;
         this.packetStatus = 0;
         this.packetLength = 0;
         this.packetData = null;
+        this.selectionKey = NetCore.getInstance().register(channel, SelectionKey.OP_READ, this);
     }
 
     public SelectionKey getSelectionKey() {
@@ -77,12 +77,10 @@ public class Client {
                 switch (packetStatus) {
                     case 0:
                         packetLength = buffer.get() & 0xff;
-                        LOGGER.info("{}", packetLength);
                         packetStatus = 1;
                         break;
                     case 1:
                         packetLength += (buffer.get() & 0xff) << 8;
-                        LOGGER.info("{}", packetLength);
                         packetData = new byte[packetLength];
                         packetLength = 0;
                         packetStatus = 2;
@@ -90,7 +88,6 @@ public class Client {
                     case 2:
                         for (; buffer.hasRemaining() && packetLength < packetData.length; packetLength++) {
                             packetData[packetLength] = buffer.get();
-                            System.out.println(packetData[packetLength]);
                         }
                         if (packetLength == packetData.length) {
                             System.out.println("done");

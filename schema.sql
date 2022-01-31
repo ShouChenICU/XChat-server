@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 25/01/2022 15:28:51
+ Date: 31/01/2022 22:50:20
 */
 
 PRAGMA foreign_keys = false;
@@ -63,6 +63,7 @@ CREATE TABLE "t_files" (
   "type" text NOT NULL DEFAULT '',
   "status" integer NOT NULL DEFAULT 0,
   "hash" text NOT NULL DEFAULT '',
+  "quote_count" integer NOT NULL DEFAULT 0,
   "create_time" integer NOT NULL DEFAULT 0,
   CONSTRAINT "dir_id" FOREIGN KEY ("dir_id") REFERENCES "t_files" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );

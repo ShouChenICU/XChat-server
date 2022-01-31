@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -57,20 +58,20 @@ public class DispatchCenter {
     /**
      * 新客户连接
      *
-     * @param selectionKey 网络通道
+     * @param channel 网络通道
      */
-    public Client newClient(SelectionKey selectionKey) {
-        Client client = new Client(selectionKey);
+    public void newClient(SocketChannel channel) throws IOException {
+        Client client = new Client(channel);
         synchronized (onlineClientList) {
             onlineClientList.add(client);
         }
         timerExecutor.schedule(() -> {
             if (!client.isLogin()) {
                 kick(client, "登陆超时");
-                closeClient(client);
+                // TODO: 2022/1/31
+                //closeClient(client);
             }
         }, 5, TimeUnit.SECONDS);
-        return client;
     }
 
     /**
