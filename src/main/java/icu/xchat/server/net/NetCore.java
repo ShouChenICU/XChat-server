@@ -76,7 +76,7 @@ public class NetCore {
                     WorkerThreadPool.execute(() -> {
                         try {
                             client.doRead();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             LOGGER.warn("", e);
                             dispatchCenter.closeClient(client);
                         }

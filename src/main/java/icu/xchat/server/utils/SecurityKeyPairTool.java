@@ -26,6 +26,7 @@ public final class SecurityKeyPairTool {
     private static final String PRIVATE_KEY = "private-key";
     public static final String KEYPAIR_ALGORITHM_RSA = "RSA";
     public static final int KEYPAIR_SIZE_DEFAULT = 4096;
+    private static String keyPairType;
     private static KeyPair keypair;
     private static PublicKey publicKey;
     private static PrivateKey privateKey;
@@ -89,7 +90,22 @@ public final class SecurityKeyPairTool {
     public static synchronized void loadKeyPair(String keypairType) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         if (keypair != null) {
             LOGGER.warn("不能重复加载密钥！");
+            return;
         }
+        if (KEYPAIR_ALGORITHM_RSA.equalsIgnoreCase(keypairType)) {
+            keyPairType = keypairType;
+            loadRsaKeyPair();
+        }
+    }
+
+    public static String getKeyPairType() {
+        return keyPairType;
+    }
+
+    /**
+     * 加载RSA密钥对
+     */
+    private static void loadRsaKeyPair() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try (FileInputStream inputStream = new FileInputStream(KEYPAIR_FILE_NAME);
              InflaterInputStream inflaterInputStream = new InflaterInputStream(inputStream)) {
@@ -102,7 +118,7 @@ public final class SecurityKeyPairTool {
         byte[] data = outputStream.toByteArray();
         BSONDecoder decoder = new BasicBSONDecoder();
         BSONObject bsonObject = decoder.readObject(data);
-        KeyFactory keyFactory = KeyFactory.getInstance(keypairType);
+        KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_ALGORITHM_RSA);
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec((byte[]) bsonObject.get(PUBLIC_KEY));
         publicKey = keyFactory.generatePublic(x509EncodedKeySpec);
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec((byte[]) bsonObject.get(PRIVATE_KEY));

@@ -7,14 +7,7 @@ import icu.xchat.server.net.PacketBody;
  *
  * @author shouchen
  */
-public interface Task {
-    /**
-     * 获取任务id
-     *
-     * @return 任务id
-     */
-    int getTaskId();
-
+interface Task {
     /**
      * 获取任务进度
      *
@@ -25,7 +18,13 @@ public interface Task {
     /**
      * 处理一个包
      *
-     * @param packetBody 数据包
+     * @param packetBody 包
+     * @return 下一个发送的包，为null则结束任务
      */
-    void handlePacketBody(PacketBody packetBody);
+    PacketBody handlePacket(PacketBody packetBody) throws Exception;
+
+    /**
+     * 任务结束
+     */
+    void done();
 }

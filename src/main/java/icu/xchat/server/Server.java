@@ -4,6 +4,7 @@ import icu.xchat.server.configurations.ServerConfiguration;
 import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.net.NetCore;
 import icu.xchat.server.net.WorkerThreadPool;
+import icu.xchat.server.utils.EncryptUtils;
 import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ public final class Server {
         configuration = ServerConfiguration.load();
         LOGGER.info("加载服务端密钥对...");
         SecurityKeyPairTool.loadKeyPair(configuration.getKeypairAlgorithm());
+        EncryptUtils.init(configuration.getKeypairAlgorithm());
         LOGGER.info("密钥对加载完毕");
         LOGGER.info("初始化数据库...");
         DataBaseManager.initDataBase(configuration.getDbType(), configuration.getDbUsername(), configuration.getDbPassword(), configuration.getDbUrl());

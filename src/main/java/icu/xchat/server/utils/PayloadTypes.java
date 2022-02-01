@@ -27,7 +27,7 @@ public class PayloadTypes {
      */
     public static final int PAYLOAD_MSG = 4;
     /**
-     * 文件
+     * 资源
      */
-    public static final int PAYLOAD_FILE = 5;
+    public static final int PAYLOAD_RESOURCE = 5;
 }

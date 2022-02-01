@@ -12,12 +12,9 @@ public class PacketBody {
     private byte[] data;
 
     public PacketBody() {
-    }
-
-    public PacketBody(int id, int type, byte[] data) {
-        this.id = id;
-        this.type = type;
-        this.data = data;
+        this.taskId = 0;
+        this.id = 0;
+        this.data = null;
     }
 
     public int getTaskId() {
