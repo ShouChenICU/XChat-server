@@ -9,25 +9,17 @@ public class PayloadTypes {
     /**
      * 执行命令
      */
-    public static final int PAYLOAD_COMMAND = 0;
+    public static final int COMMAND = 0;
     /**
-     * 创建任务
+     * 登陆
      */
-    public static final int PAYLOAD_TASK = 1;
-    /**
-     * 公钥
-     */
-    public static final int PAYLOAD_PUBLIC_KEY = 2;
-    /**
-     * 密钥
-     */
-    public static final int PAYLOAD_SECRET_KEY = 3;
+    public static final int LOGIN = 1;
     /**
      * 消息
      */
-    public static final int PAYLOAD_MSG = 4;
+    public static final int MSG = 2;
     /**
      * 资源
      */
-    public static final int PAYLOAD_RESOURCE = 5;
+    public static final int RESOURCE = 3;
 }

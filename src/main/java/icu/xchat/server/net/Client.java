@@ -1,8 +1,10 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.entities.UserInfo;
-import icu.xchat.server.net.tasks.AbstractTask;
+import icu.xchat.server.exceptions.NoTaskException;
+import icu.xchat.server.net.tasks.CommandTask;
 import icu.xchat.server.net.tasks.LoginTask;
+import icu.xchat.server.net.tasks.Task;
 import icu.xchat.server.utils.PackageUtils;
 import icu.xchat.server.utils.PayloadTypes;
 import org.slf4j.Logger;
@@ -12,9 +14,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 网络客户端实体
@@ -26,9 +27,9 @@ public class Client {
     private SelectionKey selectionKey;
     private final SocketChannel channel;
     private final ByteBuffer readBuffer;
-    private final Map<Integer, AbstractTask> taskMap;
+    private final ConcurrentHashMap<Integer, Task> taskMap;
+    private final PackageUtils packageUtils;
     private UserInfo userInfo;
-    private PackageUtils packageUtils;
     private long heartTime;
     private int taskId;
     private int packetStatus;
@@ -38,15 +39,14 @@ public class Client {
     public Client(SocketChannel channel) throws IOException {
         this.channel = channel;
         this.readBuffer = ByteBuffer.allocateDirect(256);
-        this.taskMap = new HashMap<>();
+        this.taskMap = new ConcurrentHashMap<>();
         this.userInfo = null;
         this.packageUtils = new PackageUtils();
         this.heartTime = System.currentTimeMillis();
-        this.taskId = 1;
+        this.taskId = -1;
         this.packetStatus = 0;
         this.packetLength = 0;
         this.packetData = null;
-        taskMap.put(0, new LoginTask(this));
         this.selectionKey = NetCore.getInstance().register(channel, SelectionKey.OP_READ, this);
     }
 
@@ -122,17 +122,28 @@ public class Client {
      */
     private void handlePacket(PacketBody packetBody) throws Exception {
         PacketBody packet = null;
-        if (this.userInfo == null) {
-            packet = taskMap.get(0).handlePacket(packetBody);
-        }
-        switch (packetBody.getTaskId()) {
-            case PayloadTypes.PAYLOAD_COMMAND:
-                break;
-            case PayloadTypes.PAYLOAD_TASK:
-                break;
+        if (packetBody.getTaskId() != 0) {
+            Task task = taskMap.get(packetBody.getTaskId());
+            if (task == null) {
+                switch (packetBody.getPayloadType()) {
+                    case PayloadTypes.COMMAND:
+                        task = new CommandTask();
+                        break;
+                    case PayloadTypes.LOGIN:
+                        task = new LoginTask(this);
+                        break;
+                    default:
+                        throw new NoTaskException();
+                }
+                taskMap.put(packetBody.getTaskId(), task);
+            }
+            packet = task.handlePacket(packetBody);
+            if (packet != null) {
+                packet.setTaskId(packetBody.getTaskId());
+            } else {
 
-        }
-        if (packet != null) {
+            }
+        } else {
 
         }
     }

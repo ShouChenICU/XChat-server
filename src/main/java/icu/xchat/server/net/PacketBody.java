@@ -8,7 +8,7 @@ package icu.xchat.server.net;
 public class PacketBody {
     private int taskId;
     private int id;
-    private int type;
+    private int payloadType;
     private byte[] data;
 
     public PacketBody() {
@@ -35,12 +35,12 @@ public class PacketBody {
         return this;
     }
 
-    public int getType() {
-        return type;
+    public int getPayloadType() {
+        return payloadType;
     }
 
-    public PacketBody setType(int type) {
-        this.type = type;
+    public PacketBody setPayloadType(int payloadType) {
+        this.payloadType = payloadType;
         return this;
     }
 

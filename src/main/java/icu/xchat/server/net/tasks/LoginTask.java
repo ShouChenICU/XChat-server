@@ -2,6 +2,7 @@ package icu.xchat.server.net.tasks;
 
 import icu.xchat.server.GlobalVariables;
 import icu.xchat.server.exceptions.LoginFailException;
+import icu.xchat.server.exceptions.RepeatLoginException;
 import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.utils.EncryptUtils;
@@ -19,9 +20,11 @@ import java.util.Objects;
 public class LoginTask extends AbstractTask {
     private final Client client;
 
-    public LoginTask(Client client) {
-        super(() -> {
-        });
+    public LoginTask(Client client) throws RepeatLoginException {
+        super(null, null);
+        if (client.getUserInfo() != null) {
+            throw new RepeatLoginException();
+        }
         this.packetSum = 3;
         this.client = client;
     }
@@ -31,10 +34,10 @@ public class LoginTask extends AbstractTask {
         PacketBody packet = null;
         byte[] data = packetBody.getData();
         if (data == null) {
-            throw new LoginFailException("");
+            throw new LoginFailException("null");
         }
         BSONObject bsonObject = new BasicBSONDecoder().readObject(data);
-        switch (this.packetId) {
+        switch (packetBody.getId()) {
             case 0:
                 if (!Objects.equals(GlobalVariables.PROTOCOL_VERSION, bsonObject.get("PROTOCOL_VERSION"))) {
                     throw new LoginFailException("通讯协议版本错误");
@@ -43,13 +46,18 @@ public class LoginTask extends AbstractTask {
                 bsonObject.put("PUBLIC_KEY", SecurityKeyPairTool.getPublicKey().getEncoded());
                 packet = new PacketBody()
                         .setTaskId(packetBody.getTaskId())
+                        .setId(++this.packetCount)
                         .setData(new BasicBSONEncoder().encode(bsonObject));
                 client.getPackageUtils().setDecryptCipher(EncryptUtils.getDecryptCipher());
-                this.packetId = 1;
                 break;
             case 1:
 
         }
         return packet;
+    }
+
+    @Override
+    public PacketBody startPacket() {
+        return null;
     }
 }

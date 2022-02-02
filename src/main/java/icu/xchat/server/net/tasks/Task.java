@@ -3,11 +3,11 @@ package icu.xchat.server.net.tasks;
 import icu.xchat.server.net.PacketBody;
 
 /**
- * 传输任务抽象类
+ * 传输任务抽象接口
  *
  * @author shouchen
  */
-interface Task {
+public interface Task {
     /**
      * 获取任务进度
      *
@@ -24,7 +24,9 @@ interface Task {
     PacketBody handlePacket(PacketBody packetBody) throws Exception;
 
     /**
-     * 任务结束
+     * 起步包
+     *
+     * @return 第一个发送的包
      */
-    void done();
+    PacketBody startPacket();
 }
