@@ -1,14 +1,28 @@
 package icu.xchat.server.net;
 
+import java.io.Serializable;
+
 /**
  * 网络传输内容帧
  *
  * @author shouchen
  */
-public class PacketBody {
+public class PacketBody implements Serializable {
+    /**
+     * 任务id
+     */
     private int taskId;
+    /**
+     * 包id
+     */
     private int id;
+    /**
+     * 负载类型
+     */
     private int payloadType;
+    /**
+     * 负载数据
+     */
     private byte[] data;
 
     public PacketBody() {

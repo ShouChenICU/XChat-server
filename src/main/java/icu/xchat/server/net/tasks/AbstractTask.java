@@ -23,6 +23,10 @@ public abstract class AbstractTask implements Task {
         return (double) packetCount / packetSum;
     }
 
+    @Override
+    public void terminate() {
+    }
+
     public void done() {
         completeCallBack.run();
     }

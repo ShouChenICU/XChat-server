@@ -23,13 +23,13 @@ public final class EncryptUtils {
     }
 
     public static Cipher getEncryptCipher(SecretKey encryptKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance("AES");
+        Cipher cipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, encryptKey);
         return cipher;
     }
 
     public static Cipher getDecryptCipher(SecretKey decryptKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance("AES");
+        Cipher cipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, decryptKey);
         return cipher;
     }

@@ -17,10 +17,15 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-public class LoginTask extends AbstractTask {
+/**
+ * 用户登陆任务
+ *
+ * @author shouchen
+ */
+public class UserLoginTask extends AbstractTask {
     private final Client client;
 
-    public LoginTask(Client client) throws RepeatLoginException {
+    public UserLoginTask(Client client) throws RepeatLoginException {
         super(null, null);
         if (client.getUserInfo() != null) {
             throw new RepeatLoginException();

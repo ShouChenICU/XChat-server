@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -65,11 +66,13 @@ public class NetCore {
             try {
                 mainSelector.select();
             } catch (IOException e) {
-                LOGGER.error(",", e);
+                LOGGER.error("", e);
                 return;
             }
-            for (SelectionKey key : selectionKeys) {
-                selectionKeys.remove(key);
+            Iterator<SelectionKey> keyIterator = selectionKeys.iterator();
+            while (keyIterator.hasNext()) {
+                SelectionKey key = keyIterator.next();
+                keyIterator.remove();
                 if (key.isReadable()) {
                     Client client = (Client) key.attachment();
                     key.cancel();

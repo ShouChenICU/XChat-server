@@ -1,10 +1,10 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.entities.UserInfo;
-import icu.xchat.server.exceptions.NoTaskException;
+import icu.xchat.server.exceptions.UnknowTaskException;
 import icu.xchat.server.net.tasks.CommandTask;
-import icu.xchat.server.net.tasks.LoginTask;
 import icu.xchat.server.net.tasks.Task;
+import icu.xchat.server.net.tasks.UserLoginTask;
 import icu.xchat.server.utils.PackageUtils;
 import icu.xchat.server.utils.PayloadTypes;
 import org.slf4j.Logger;
@@ -121,7 +121,7 @@ public class Client {
      * @param packetBody 包
      */
     private void handlePacket(PacketBody packetBody) throws Exception {
-        PacketBody packet = null;
+        PacketBody packet;
         if (packetBody.getTaskId() != 0) {
             Task task = taskMap.get(packetBody.getTaskId());
             if (task == null) {
@@ -130,18 +130,20 @@ public class Client {
                         task = new CommandTask();
                         break;
                     case PayloadTypes.LOGIN:
-                        task = new LoginTask(this);
+                        task = new UserLoginTask(this);
                         break;
+                    // TODO: 2022/2/3
                     default:
-                        throw new NoTaskException();
+                        throw new UnknowTaskException();
                 }
                 taskMap.put(packetBody.getTaskId(), task);
             }
             packet = task.handlePacket(packetBody);
             if (packet != null) {
                 packet.setTaskId(packetBody.getTaskId());
+                postPacket(packet);
             } else {
-
+                taskMap.remove(packetBody.getTaskId());
             }
         } else {
 

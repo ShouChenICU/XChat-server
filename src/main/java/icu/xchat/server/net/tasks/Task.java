@@ -29,4 +29,9 @@ public interface Task {
      * @return 第一个发送的包
      */
     PacketBody startPacket();
+
+    /**
+     * 终止任务
+     */
+    void terminate();
 }
