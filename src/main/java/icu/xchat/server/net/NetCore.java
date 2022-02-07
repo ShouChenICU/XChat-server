@@ -16,35 +16,22 @@ import java.util.Set;
  */
 public class NetCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetCore.class);
-    private static volatile NetCore netCore;
-    private final ServerSocketChannel serverSocketChannel;
-    private final Selector mainSelector;
-    private final DispatchCenter dispatchCenter;
-    private boolean isRun;
+    private static ServerSocketChannel serverSocketChannel;
+    private static Selector mainSelector;
+    private static DispatchCenter dispatchCenter;
+    private static boolean isRun;
 
-    /**
-     * 获取单例
-     *
-     * @return 单实例
-     */
-    public static NetCore getInstance() throws IOException {
-        if (netCore == null) {
-            synchronized (NetCore.class) {
-                if (netCore == null) {
-                    netCore = new NetCore();
-                }
-            }
+    static {
+        try {
+            serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.configureBlocking(false);
+            mainSelector = Selector.open();
+            serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
+            dispatchCenter = DispatchCenter.getInstance();
+            isRun = true;
+        } catch (Exception e) {
+            LOGGER.error("", e);
         }
-        return netCore;
-    }
-
-    private NetCore() throws IOException {
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.configureBlocking(false);
-        mainSelector = Selector.open();
-        serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
-        dispatchCenter = DispatchCenter.getInstance();
-        isRun = true;
     }
 
     /**
@@ -53,15 +40,15 @@ public class NetCore {
      * @param port 端口
      * @throws IOException IO异常
      */
-    public void bindPort(int port) throws IOException {
+    public static void bindPort(int port) throws IOException {
         serverSocketChannel.bind(new InetSocketAddress(port));
     }
 
     /**
      * 主轮询
      */
-    public void mainLoop() {
-        Set<SelectionKey> selectionKeys = mainSelector.selectedKeys();
+    public static void mainLoop() {
+        Set<SelectionKey> selectedKeys = mainSelector.selectedKeys();
         while (isRun) {
             try {
                 mainSelector.select();
@@ -69,7 +56,7 @@ public class NetCore {
                 LOGGER.error("", e);
                 return;
             }
-            Iterator<SelectionKey> keyIterator = selectionKeys.iterator();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
                 keyIterator.remove();
@@ -98,13 +85,17 @@ public class NetCore {
         }
     }
 
-    public SelectionKey register(SocketChannel channel, int ops, Client client) throws ClosedChannelException {
+    public static void wakeup() {
+        mainSelector.wakeup();
+    }
+
+    public static SelectionKey register(SocketChannel channel, int ops, Client client) throws ClosedChannelException {
         SelectionKey selectionKey = channel.register(mainSelector, ops, client);
         mainSelector.wakeup();
         return selectionKey;
     }
 
-    public void stop() {
+    public static void stop() {
         isRun = false;
         try {
             mainSelector.close();
@@ -115,7 +106,7 @@ public class NetCore {
         dispatchCenter.stop();
     }
 
-    public boolean isRun() {
+    public static boolean isRun() {
         return isRun;
     }
 }

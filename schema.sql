@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 31/01/2022 22:50:20
+ Date: 07/02/2022 19:56:50
 */
 
 PRAGMA foreign_keys = false;
@@ -146,6 +146,7 @@ CREATE TABLE "t_users" (
   "level" integer NOT NULL DEFAULT 0,
   "exp" integer NOT NULL DEFAULT 0,
   "status" integer NOT NULL DEFAULT 0,
+  "signature" text NOT NULL DEFAULT '',
   "time_stamp" integer NOT NULL DEFAULT 0
 );
 

@@ -89,7 +89,6 @@ public final class SecurityKeyPairTool {
      */
     public static synchronized void loadKeyPair(String keypairType) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         if (keypair != null) {
-            LOGGER.warn("不能重复加载密钥！");
             return;
         }
         if (KEYPAIR_ALGORITHM_RSA.equalsIgnoreCase(keypairType)) {

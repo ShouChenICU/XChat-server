@@ -10,11 +10,7 @@ import java.security.SecureRandom;
 
 public final class EncryptUtils {
     private static final int KEY_SIZE = 256;
-    private static String ENCRYPT_ALGORITHM;
-
-    public static void init(String keypairAlgorithm) {
-        ENCRYPT_ALGORITHM = keypairAlgorithm;
-    }
+    private static final String ENCRYPT_ALGORITHM = "AES";
 
     public static SecretKey genAesKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(ENCRYPT_ALGORITHM);

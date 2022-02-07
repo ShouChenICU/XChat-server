@@ -4,7 +4,6 @@ import icu.xchat.server.configurations.ServerConfiguration;
 import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.net.NetCore;
 import icu.xchat.server.net.WorkerThreadPool;
-import icu.xchat.server.utils.EncryptUtils;
 import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 public final class Server {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
     private static ServerConfiguration configuration;
-    private static NetCore netCore;
 
     /**
      * 初始化服务端
@@ -27,7 +25,6 @@ public final class Server {
         configuration = ServerConfiguration.load();
         LOGGER.info("加载服务端密钥对...");
         SecurityKeyPairTool.loadKeyPair(configuration.getKeypairAlgorithm());
-        EncryptUtils.init(configuration.getKeypairAlgorithm());
         LOGGER.info("密钥对加载完毕");
         LOGGER.info("初始化数据库...");
         DataBaseManager.initDataBase(configuration.getDbType(), configuration.getDbUsername(), configuration.getDbPassword(), configuration.getDbUrl());
@@ -36,8 +33,7 @@ public final class Server {
         WorkerThreadPool.init(configuration.getThreadPoolSize());
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
         LOGGER.info("初始化网络...");
-        netCore = NetCore.getInstance();
-        netCore.bindPort(configuration.getServerPort());
+        NetCore.bindPort(configuration.getServerPort());
         LOGGER.info("网络初始化完毕");
         Runtime.getRuntime().addShutdownHook(new Thread(Server::stop));
     }
@@ -72,7 +68,7 @@ public final class Server {
             LOGGER.error("初始化失败！", e);
             System.exit(-1);
         }
-        netCore.mainLoop();
+        NetCore.mainLoop();
     }
 
     /**
@@ -80,11 +76,11 @@ public final class Server {
      */
     public static void stop() {
         synchronized (Server.class) {
-            if (!netCore.isRun()) {
+            if (!NetCore.isRun()) {
                 return;
             }
         }
         LOGGER.info("停止XChat-server...");
-        netCore.stop();
+        NetCore.stop();
     }
 }

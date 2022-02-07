@@ -47,7 +47,7 @@ public class Client {
         this.packetStatus = 0;
         this.packetLength = 0;
         this.packetData = null;
-        this.selectionKey = NetCore.getInstance().register(channel, SelectionKey.OP_READ, this);
+        this.selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
     }
 
     public SelectionKey getSelectionKey() {
@@ -112,7 +112,7 @@ public class Client {
             }
             readBuffer.clear();
         }
-        selectionKey = NetCore.getInstance().register(channel, SelectionKey.OP_READ, this);
+        selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
     }
 
     /**

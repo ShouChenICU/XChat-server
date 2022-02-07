@@ -25,6 +25,10 @@ public class UserInfo {
      */
     private Integer status;
     /**
+     * 签名
+     */
+    private String signature;
+    /**
      * 修改时间
      */
     private Long timeStamp;
@@ -75,6 +79,15 @@ public class UserInfo {
 
     public UserInfo setTimeStamp(Long timeStamp) {
         this.timeStamp = timeStamp;
+        return this;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public UserInfo setSignature(String signature) {
+        this.signature = signature;
         return this;
     }
 

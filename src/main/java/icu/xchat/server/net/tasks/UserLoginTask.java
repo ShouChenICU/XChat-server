@@ -51,7 +51,7 @@ public class UserLoginTask extends AbstractTask {
                 bsonObject.put("PUBLIC_KEY", SecurityKeyPairTool.getPublicKey().getEncoded());
                 packet = new PacketBody()
                         .setTaskId(packetBody.getTaskId())
-                        .setId(++this.packetCount)
+                        .setId(this.packetCount++)
                         .setData(new BasicBSONEncoder().encode(bsonObject));
                 client.getPackageUtils().setDecryptCipher(EncryptUtils.getDecryptCipher());
                 break;
