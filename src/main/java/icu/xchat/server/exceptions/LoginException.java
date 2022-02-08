@@ -5,8 +5,8 @@ package icu.xchat.server.exceptions;
  *
  * @author shouchen
  */
-public class LoginFailException extends Exception {
-    public LoginFailException(String message) {
+public class LoginException extends Exception {
+    public LoginException(String message) {
         super(message);
     }
 }

@@ -46,7 +46,10 @@ public class PackageUtils {
         object.put("ID", packetBody.getId());
         object.put("PAYLOAD_TYPE", packetBody.getPayloadType());
         object.put("DATA", packetBody.getData());
-        byte[] data = CompressionUtils.compress(encoder.encode(object));
+        byte[] data;
+        synchronized (encoder) {
+            data = CompressionUtils.compress(encoder.encode(object));
+        }
         if (encryptCipher != null) {
             data = encryptCipher.doFinal(data);
         }

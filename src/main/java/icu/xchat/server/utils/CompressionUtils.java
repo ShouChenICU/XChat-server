@@ -99,6 +99,9 @@ public final class CompressionUtils {
      * @return 解压后的数据
      */
     public static byte[] deCompress(byte[] data) throws DataFormatException {
+        if (data.length == 0) {
+            return null;
+        }
         Inflater inflater = getInflater();
         inflater.setInput(data);
         ByteArrayOutputStream outputStream = getOutputStream();

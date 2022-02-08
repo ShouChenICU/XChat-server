@@ -1,7 +1,8 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.entities.UserInfo;
-import icu.xchat.server.exceptions.UnknowTaskException;
+import icu.xchat.server.exceptions.PacketException;
+import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.CommandTask;
 import icu.xchat.server.net.tasks.Task;
 import icu.xchat.server.net.tasks.UserLoginTask;
@@ -14,8 +15,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 /**
  * 网络客户端实体
@@ -27,6 +30,7 @@ public class Client {
     private SelectionKey selectionKey;
     private final SocketChannel channel;
     private final ByteBuffer readBuffer;
+    private final ByteBuffer writeBuffer;
     private final ConcurrentHashMap<Integer, Task> taskMap;
     private final PackageUtils packageUtils;
     private UserInfo userInfo;
@@ -39,6 +43,7 @@ public class Client {
     public Client(SocketChannel channel) throws IOException {
         this.channel = channel;
         this.readBuffer = ByteBuffer.allocateDirect(256);
+        this.writeBuffer = ByteBuffer.allocateDirect(256);
         this.taskMap = new ConcurrentHashMap<>();
         this.userInfo = null;
         this.packageUtils = new PackageUtils();
@@ -77,42 +82,45 @@ public class Client {
 
     /**
      * 读取并预处理数据
-     *
-     * @throws Exception 异常
      */
-    public void doRead() throws Exception {
-        int len;
-        while ((len = channel.read(readBuffer)) != 0) {
-            if (len == -1) {
-                throw new IOException("通道关闭");
-            }
-            readBuffer.flip();
-            while (readBuffer.hasRemaining()) {
-                switch (packetStatus) {
-                    case 0:
-                        packetLength = readBuffer.get() & 0xff;
-                        packetStatus = 1;
-                        break;
-                    case 1:
-                        packetLength += (readBuffer.get() & 0xff) << 8;
-                        packetData = new byte[packetLength];
-                        packetLength = 0;
-                        packetStatus = 2;
-                        break;
-                    case 2:
-                        for (; readBuffer.hasRemaining() && packetLength < packetData.length; packetLength++) {
-                            packetData[packetLength] = readBuffer.get();
-                        }
-                        if (packetLength == packetData.length) {
-                            handlePacket(packageUtils.decodePacket(packetData));
-                            packetStatus = 0;
-                        }
-                        break;
+    public void doRead() {
+        try {
+            int len;
+            while ((len = channel.read(readBuffer)) != 0) {
+                if (len == -1) {
+                    throw new IOException("通道关闭");
                 }
+                readBuffer.flip();
+                while (readBuffer.hasRemaining()) {
+                    switch (packetStatus) {
+                        case 0:
+                            packetLength = readBuffer.get() & 0xff;
+                            packetStatus = 1;
+                            break;
+                        case 1:
+                            packetLength += (readBuffer.get() & 0xff) << 8;
+                            packetData = new byte[packetLength];
+                            packetLength = 0;
+                            packetStatus = 2;
+                            break;
+                        case 2:
+                            for (; readBuffer.hasRemaining() && packetLength < packetData.length; packetLength++) {
+                                packetData[packetLength] = readBuffer.get();
+                            }
+                            if (packetLength == packetData.length) {
+                                handlePacket(packageUtils.decodePacket(packetData));
+                                packetStatus = 0;
+                            }
+                            break;
+                    }
+                }
+                readBuffer.clear();
             }
-            readBuffer.clear();
+            selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
+        } catch (Exception e) {
+            LOGGER.warn("", e);
+            DispatchCenter.getInstance().closeClient(this);
         }
-        selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
     }
 
     /**
@@ -121,37 +129,103 @@ public class Client {
      * @param packetBody 包
      */
     private void handlePacket(PacketBody packetBody) throws Exception {
-        PacketBody packet;
+        this.heartTime = System.currentTimeMillis();
         if (packetBody.getTaskId() != 0) {
             Task task = taskMap.get(packetBody.getTaskId());
             if (task == null) {
                 switch (packetBody.getPayloadType()) {
                     case PayloadTypes.COMMAND:
-                        task = new CommandTask();
+                        task = new CommandTask()
+                                .setTaskId(packetBody.getTaskId());
                         break;
                     case PayloadTypes.LOGIN:
-                        task = new UserLoginTask(this);
+                        task = new UserLoginTask(this)
+                                .setTaskId(packetBody.getTaskId());
                         break;
                     // TODO: 2022/2/3
                     default:
-                        throw new UnknowTaskException();
+                        throw new TaskException("未知任务类型");
                 }
                 taskMap.put(packetBody.getTaskId(), task);
             }
-            packet = task.handlePacket(packetBody);
-            if (packet != null) {
-                packet.setTaskId(packetBody.getTaskId());
-                postPacket(packet);
-            } else {
-                taskMap.remove(packetBody.getTaskId());
-            }
+            task.handlePacket(packetBody);
         } else {
-
+            // TODO: 2022/2/8
         }
     }
 
-    public void postPacket(PacketBody packetBody) {
+    /**
+     * 添加一个任务
+     *
+     * @param task 任务
+     */
+    public void addTask(Task task) throws TaskException {
+        PacketBody packetBody = task.startPacket();
+        if (packetBody == null) {
+            throw new TaskException("起步包为空");
+        }
+        int id;
+        synchronized (taskMap) {
+            id = this.taskId++;
+            taskMap.put(id, task);
+        }
+        task.setTaskId(id);
+        packetBody.setTaskId(id);
+        WorkerThreadPool.execute(() -> postPacket(packetBody));
+    }
 
+    /**
+     * 移除一个任务
+     *
+     * @param taskId 任务id
+     */
+    public void removeTask(int taskId) {
+        this.taskMap.remove(taskId);
+    }
+
+    /**
+     * 发送一个包
+     *
+     * @param packetBody 包
+     */
+    public void postPacket(PacketBody packetBody) {
+        try {
+            byte[] dat = packageUtils.encodePacket(packetBody);
+            int length = dat.length;
+            if (length > 65535) {
+                throw new PacketException("包长度错误 " + length);
+            }
+            synchronized (channel) {
+                writeBuffer.put((byte) (length % 256))
+                        .put((byte) (length / 256));
+                int offset = 0;
+                while (offset < dat.length) {
+                    if (writeBuffer.hasRemaining()) {
+                        length = Math.min(writeBuffer.remaining(), dat.length - offset);
+                        writeBuffer.put(dat, offset, length);
+                        offset += length;
+                    }
+                    writeBuffer.flip();
+                    int waitCount = 0;
+                    while (writeBuffer.hasRemaining()) {
+                        if (channel.write(writeBuffer) == 0) {
+                            if (waitCount >= 10) {
+                                throw new TimeoutException("写入超时");
+                            }
+                            Thread.sleep(100);
+                            waitCount++;
+                        } else {
+                            waitCount = 0;
+                        }
+                    }
+                    writeBuffer.clear();
+                }
+            }
+            this.heartTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            LOGGER.warn("", e);
+            DispatchCenter.getInstance().closeClient(this);
+        }
     }
 
     @Override

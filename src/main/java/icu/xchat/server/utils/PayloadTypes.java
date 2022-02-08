@@ -22,4 +22,8 @@ public class PayloadTypes {
      * 资源
      */
     public static final int RESOURCE = 3;
+    /**
+     * 心跳包
+     */
+    public static final int HEART = 4;
 }

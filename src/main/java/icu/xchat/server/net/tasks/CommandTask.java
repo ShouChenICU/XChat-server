@@ -14,8 +14,7 @@ public class CommandTask extends AbstractTask {
     }
 
     @Override
-    public PacketBody handlePacket(PacketBody packetBody) throws Exception {
-        return null;
+    public void handlePacket(PacketBody packetBody) {
     }
 
     @Override

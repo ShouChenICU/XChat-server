@@ -6,6 +6,7 @@ package icu.xchat.server.net.tasks;
  * @author shouchen
  */
 public abstract class AbstractTask implements Task {
+    protected int taskId;
     protected int packetCount;
     protected int packetSum;
     protected Runnable completeCallBack;
@@ -16,6 +17,17 @@ public abstract class AbstractTask implements Task {
         this.packetSum = 0;
         this.completeCallBack = completeCallBack;
         this.progressCallBack = progressCallBack;
+    }
+
+    @Override
+    public int getTaskId() {
+        return taskId;
+    }
+
+    @Override
+    public AbstractTask setTaskId(int taskId) {
+        this.taskId = taskId;
+        return this;
     }
 
     @Override

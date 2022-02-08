@@ -1,5 +1,6 @@
 package icu.xchat.server.database;
 
+import icu.xchat.server.exceptions.UnknownDatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,14 +22,17 @@ public final class DataBaseManager {
      *
      * @param dbType 数据库类型
      */
-    public static synchronized void initDataBase(String dbType, String username, String password, String url) {
+    public static synchronized void initDataBase(String dbType, String username, String password, String url) throws UnknownDatabaseException {
         if (dataBase != null) {
             LOGGER.warn("重复初始化数据库！");
             return;
         }
         if (DB_TYPE_SQLITE.equalsIgnoreCase(dbType)) {
             initSQLite(username, password, url);
+        } else {
+            throw new UnknownDatabaseException();
         }
+        DaoManager.init();
     }
 
     /**

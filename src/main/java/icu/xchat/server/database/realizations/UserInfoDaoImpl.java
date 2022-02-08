@@ -9,23 +9,6 @@ import icu.xchat.server.entities.UserInfo;
  * @author shouchen
  */
 public class UserInfoDaoImpl implements UserInfoDao {
-    private static volatile UserInfoDao userInfoDao;
-
-    public static UserInfoDao getInstance() {
-        if (userInfoDao == null) {
-            synchronized (UserInfoDaoImpl.class) {
-                if (userInfoDao == null) {
-                    userInfoDao = new UserInfoDaoImpl();
-                }
-            }
-        }
-        return userInfoDao;
-    }
-
-    private UserInfoDaoImpl() {
-    }
-
-
     /**
      * 根据用户标识码获取一个用户信息
      *
@@ -34,6 +17,8 @@ public class UserInfoDaoImpl implements UserInfoDao {
      */
     @Override
     public UserInfo getUserInfoByUidCode(String uidCode) {
-        return null;
+        return new UserInfo()
+                .setUidCode(uidCode)
+                .setTimeStamp(0L);
     }
 }

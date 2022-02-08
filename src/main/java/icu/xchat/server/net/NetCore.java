@@ -63,14 +63,7 @@ public class NetCore {
                 if (key.isReadable()) {
                     Client client = (Client) key.attachment();
                     key.cancel();
-                    WorkerThreadPool.execute(() -> {
-                        try {
-                            client.doRead();
-                        } catch (Exception e) {
-                            LOGGER.warn("", e);
-                            dispatchCenter.closeClient(client);
-                        }
-                    });
+                    WorkerThreadPool.execute(client::doRead);
                 } else if (key.isAcceptable()) {
                     try {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();

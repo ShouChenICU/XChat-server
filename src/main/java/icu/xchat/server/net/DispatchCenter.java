@@ -69,8 +69,7 @@ public class DispatchCenter {
         timerExecutor.schedule(() -> {
             if (!client.isLogin()) {
                 kick(client, "登陆超时");
-                // TODO: 2022/1/31
-                //closeClient(client);
+                closeClient(client);
             }
         }, 5, TimeUnit.SECONDS);
     }
