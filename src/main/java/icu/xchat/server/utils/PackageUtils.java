@@ -14,14 +14,10 @@ import java.util.zip.DataFormatException;
  * @author shouchen
  */
 public class PackageUtils {
-    private final BSONEncoder encoder;
-    private final BSONDecoder decoder;
     private Cipher encryptCipher;
     private Cipher decryptCipher;
 
     public PackageUtils() {
-        this.encoder = new BasicBSONEncoder();
-        this.decoder = new BasicBSONDecoder();
     }
 
     public PackageUtils setEncryptKey(SecretKey encryptKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
@@ -47,9 +43,7 @@ public class PackageUtils {
         object.put("PAYLOAD_TYPE", packetBody.getPayloadType());
         object.put("DATA", packetBody.getData());
         byte[] data;
-        synchronized (encoder) {
-            data = CompressionUtils.compress(encoder.encode(object));
-        }
+        data = CompressionUtils.compress(BsonUtils.encode(object));
         if (encryptCipher != null) {
             data = encryptCipher.doFinal(data);
         }
@@ -61,7 +55,7 @@ public class PackageUtils {
             data = decryptCipher.doFinal(data);
         }
         data = CompressionUtils.deCompress(data);
-        BSONObject object = decoder.readObject(data);
+        BSONObject object = BsonUtils.decode(data);
         return new PacketBody()
                 .setTaskId((Integer) object.get("TASK_ID"))
                 .setId((Integer) object.get("ID"))

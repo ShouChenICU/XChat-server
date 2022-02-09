@@ -1,11 +1,14 @@
 package icu.xchat.server.net.tasks;
 
+import icu.xchat.server.net.Client;
+
 /**
  * 传输任务抽象类
  *
  * @author shouchen
  */
 public abstract class AbstractTask implements Task {
+    protected Client client;
     protected int taskId;
     protected int packetCount;
     protected int packetSum;

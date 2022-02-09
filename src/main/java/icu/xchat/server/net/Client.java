@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
@@ -142,15 +141,15 @@ public class Client {
                         task = new UserLoginTask(this)
                                 .setTaskId(packetBody.getTaskId());
                         break;
-                    // TODO: 2022/2/3
+                    case PayloadTypes.MSG:
+
+                        break;
                     default:
                         throw new TaskException("未知任务类型");
                 }
                 taskMap.put(packetBody.getTaskId(), task);
             }
             task.handlePacket(packetBody);
-        } else {
-            // TODO: 2022/2/8
         }
     }
 

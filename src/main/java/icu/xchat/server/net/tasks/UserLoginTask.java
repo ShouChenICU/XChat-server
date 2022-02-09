@@ -7,10 +7,10 @@ import icu.xchat.server.exceptions.LoginException;
 import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
+import icu.xchat.server.utils.BsonUtils;
 import icu.xchat.server.utils.EncryptUtils;
 import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.bson.BSONObject;
-import org.bson.BasicBSONDecoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -28,7 +28,6 @@ import java.util.Random;
  * @author shouchen
  */
 public class UserLoginTask extends AbstractTask {
-    private final Client client;
     private UserInfo userInfo;
     private byte[] authCode;
 
@@ -47,7 +46,7 @@ public class UserLoginTask extends AbstractTask {
         BSONObject bsonObject;
         switch (packetBody.getId()) {
             case 0:
-                bsonObject = new BasicBSONDecoder().readObject(data);
+                bsonObject = BsonUtils.decode(data);
                 if (!Objects.equals(GlobalVariables.PROTOCOL_VERSION, bsonObject.get("PROTOCOL_VERSION"))) {
                     throw new LoginException("通讯协议版本错误");
                 }

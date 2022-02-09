@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class WorkerThreadPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkerThreadPool.class);
     private static final int MAX_WORK_COUNT = 4096;
-    private static final String THREAD_NAME = "worker-public-thread";
+    private static final String THREAD_NAME = "worker-thread-pool";
     private static ThreadPoolExecutor executor;
     private static volatile int threadNum = 0;
 
