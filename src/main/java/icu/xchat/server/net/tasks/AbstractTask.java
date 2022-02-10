@@ -8,18 +8,40 @@ import icu.xchat.server.net.Client;
  * @author shouchen
  */
 public abstract class AbstractTask implements Task {
+    public static final ProgressCallBack EMPTY_PROGRESS_CALLBACK = new ProgressCallBack() {
+        @Override
+        public void startProgress() {
+        }
+
+        @Override
+        public void updateProgress(double progress) {
+        }
+
+        @Override
+        public void completeProgress() {
+        }
+
+        @Override
+        public void terminate(String errMsg) {
+        }
+    };
     protected Client client;
     protected int taskId;
     protected int packetCount;
     protected int packetSum;
-    protected Runnable completeCallBack;
     protected ProgressCallBack progressCallBack;
 
-    public AbstractTask(Runnable completeCallBack, ProgressCallBack progressCallBack) {
+    public AbstractTask() {
         this.packetCount = 0;
         this.packetSum = 0;
-        this.completeCallBack = completeCallBack;
+        this.progressCallBack = EMPTY_PROGRESS_CALLBACK;
+    }
+
+    public AbstractTask(ProgressCallBack progressCallBack) {
+        this.packetCount = 0;
+        this.packetSum = 0;
         this.progressCallBack = progressCallBack;
+        progressCallBack.startProgress();
     }
 
     @Override
@@ -39,10 +61,11 @@ public abstract class AbstractTask implements Task {
     }
 
     @Override
-    public void terminate() {
+    public void terminate(String errMsg) {
+        progressCallBack.terminate(errMsg);
     }
 
     public void done() {
-        completeCallBack.run();
+        progressCallBack.completeProgress();
     }
 }

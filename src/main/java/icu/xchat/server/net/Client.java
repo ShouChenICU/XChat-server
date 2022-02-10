@@ -4,10 +4,11 @@ import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.PacketException;
 import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.CommandTask;
+import icu.xchat.server.net.tasks.IdentitySyncTask;
 import icu.xchat.server.net.tasks.Task;
 import icu.xchat.server.net.tasks.UserLoginTask;
 import icu.xchat.server.utils.PackageUtils;
-import icu.xchat.server.utils.PayloadTypes;
+import icu.xchat.server.utils.TaskTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,17 +133,18 @@ public class Client {
         if (packetBody.getTaskId() != 0) {
             Task task = taskMap.get(packetBody.getTaskId());
             if (task == null) {
-                switch (packetBody.getPayloadType()) {
-                    case PayloadTypes.COMMAND:
+                switch (packetBody.getTaskType()) {
+                    case TaskTypes.COMMAND:
                         task = new CommandTask()
                                 .setTaskId(packetBody.getTaskId());
                         break;
-                    case PayloadTypes.LOGIN:
+                    case TaskTypes.LOGIN:
                         task = new UserLoginTask(this)
                                 .setTaskId(packetBody.getTaskId());
                         break;
-                    case PayloadTypes.MSG:
-
+                    case TaskTypes.IDENTITY_SYNC:
+                        task = new IdentitySyncTask(this)
+                                .setTaskId(packetBody.getTaskId());
                         break;
                     default:
                         throw new TaskException("未知任务类型");

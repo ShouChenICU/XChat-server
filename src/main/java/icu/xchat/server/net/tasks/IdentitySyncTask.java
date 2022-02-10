@@ -4,13 +4,12 @@ import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 
 /**
- * 消息接收处理任务
+ * 身份同步任务
  *
  * @author shouchen
  */
-public class MessageReceiveTask extends AbstractTask {
-
-    public MessageReceiveTask(Client client) {
+public class IdentitySyncTask extends AbstractTask {
+    public IdentitySyncTask(Client client) {
         this.client = client;
     }
 

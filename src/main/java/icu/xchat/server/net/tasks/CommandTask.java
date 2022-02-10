@@ -9,7 +9,6 @@ import icu.xchat.server.net.PacketBody;
  */
 public class CommandTask extends AbstractTask {
     public CommandTask() {
-        super(null, null);
         // TODO: 2022/2/2
     }
 

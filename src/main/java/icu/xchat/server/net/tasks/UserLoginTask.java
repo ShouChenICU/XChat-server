@@ -10,7 +10,11 @@ import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
 import icu.xchat.server.utils.EncryptUtils;
 import icu.xchat.server.utils.SecurityKeyPairTool;
+import icu.xchat.server.utils.TaskTypes;
 import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -28,11 +32,11 @@ import java.util.Random;
  * @author shouchen
  */
 public class UserLoginTask extends AbstractTask {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserLoginTask.class);
     private UserInfo userInfo;
     private byte[] authCode;
 
     public UserLoginTask(Client client) throws LoginException {
-        super(null, null);
         if (client.getUserInfo() != null) {
             throw new LoginException("重复登陆");
         }
@@ -48,6 +52,12 @@ public class UserLoginTask extends AbstractTask {
             case 0:
                 bsonObject = BsonUtils.decode(data);
                 if (!Objects.equals(GlobalVariables.PROTOCOL_VERSION, bsonObject.get("PROTOCOL_VERSION"))) {
+                    bsonObject = new BasicBSONObject();
+                    bsonObject.put("ERR_MSG", "通讯协议版本错误");
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData(BsonUtils.encode(bsonObject)));
                     throw new LoginException("通讯协议版本错误");
                 }
                 client.getPackageUtils().setDecryptCipher(EncryptUtils.getDecryptCipher());
@@ -68,6 +78,12 @@ public class UserLoginTask extends AbstractTask {
                 PublicKey publicKey = EncryptUtils.getPublicKey("RSA", data);
                 userInfo = DaoManager.getUserInfoDao().getUserInfoByUidCode(getUidCode(publicKey.getEncoded()));
                 if (userInfo == null) {
+                    bsonObject = new BasicBSONObject();
+                    bsonObject.put("ERR_MSG", "用户不存在");
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData(BsonUtils.encode(bsonObject)));
                     throw new LoginException("用户不存在");
                 }
                 Cipher cipher = EncryptUtils.getEncryptCipher("RSA", publicKey);
@@ -82,7 +98,13 @@ public class UserLoginTask extends AbstractTask {
                 if (Arrays.equals(authCode, data)) {
                     client.setUserInfo(this.userInfo);
                 } else {
-                    throw new LoginException("用户验证失败");
+                    bsonObject = new BasicBSONObject();
+                    bsonObject.put("ERR_MSG", "用户身份验证失败");
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData(BsonUtils.encode(bsonObject)));
+                    throw new LoginException("用户身份验证失败");
                 }
                 done();
                 break;
@@ -91,7 +113,7 @@ public class UserLoginTask extends AbstractTask {
 
     @Override
     public void done() {
-        System.out.println("登陆成功\n" + userInfo);
+        LOGGER.info("用户 {} 登陆成功\n", userInfo.getUidCode());
         client.removeTask(this.taskId);
     }
 

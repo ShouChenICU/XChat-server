@@ -5,7 +5,11 @@ package icu.xchat.server.utils;
  *
  * @author shouchen
  */
-public class PayloadTypes {
+public class TaskTypes {
+    /**
+     * 出错
+     */
+    public static final int ERROR = -1;
     /**
      * 执行命令
      */
@@ -26,4 +30,8 @@ public class PayloadTypes {
      * 心跳包
      */
     public static final int HEART = 4;
+    /**
+     * 身份同步
+     */
+    public static final int IDENTITY_SYNC = 5;
 }

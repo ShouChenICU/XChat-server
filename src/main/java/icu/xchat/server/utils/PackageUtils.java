@@ -40,7 +40,7 @@ public class PackageUtils {
         BSONObject object = new BasicBSONObject();
         object.put("TASK_ID", packetBody.getTaskId());
         object.put("ID", packetBody.getId());
-        object.put("PAYLOAD_TYPE", packetBody.getPayloadType());
+        object.put("TASK_TYPE", packetBody.getTaskType());
         object.put("DATA", packetBody.getData());
         byte[] data;
         data = CompressionUtils.compress(BsonUtils.encode(object));
@@ -59,7 +59,7 @@ public class PackageUtils {
         return new PacketBody()
                 .setTaskId((Integer) object.get("TASK_ID"))
                 .setId((Integer) object.get("ID"))
-                .setPayloadType(((Integer) object.get("PAYLOAD_TYPE")))
+                .setTaskType(((Integer) object.get("TASK_TYPE")))
                 .setData((byte[]) object.get("DATA"));
     }
 }
