@@ -1,7 +1,7 @@
 package icu.xchat.server.utils;
 
 /**
- * 传输帧负载类型
+ * 任务类型
  *
  * @author shouchen
  */
@@ -19,19 +19,23 @@ public class TaskTypes {
      */
     public static final int LOGIN = 1;
     /**
+     * 注销
+     */
+    public static final int LOGOUT = 2;
+    /**
      * 消息
      */
-    public static final int MSG = 2;
+    public static final int MSG = 3;
     /**
      * 资源
      */
-    public static final int RESOURCE = 3;
+    public static final int RESOURCE = 4;
     /**
      * 心跳包
      */
-    public static final int HEART = 4;
+    public static final int HEART = 5;
     /**
      * 身份同步
      */
-    public static final int IDENTITY_SYNC = 5;
+    public static final int IDENTITY_SYNC = 6;
 }

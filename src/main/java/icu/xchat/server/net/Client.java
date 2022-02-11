@@ -152,6 +152,10 @@ public class Client {
                 taskMap.put(packetBody.getTaskId(), task);
             }
             task.handlePacket(packetBody);
+        } else {
+            if (Objects.equals(packetBody.getTaskType(), TaskTypes.LOGOUT)) {
+                throw new Exception("");
+            }
         }
     }
 

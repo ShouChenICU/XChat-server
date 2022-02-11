@@ -5,6 +5,7 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
 import org.bson.BasicBSONObject;
 
+import java.security.MessageDigest;
 import java.util.Base64;
 
 /**
@@ -22,8 +23,9 @@ public final class ServerConnectCodeUtils {
     public static String genServerCode() throws Exception {
         ServerConfiguration configuration = ServerConfiguration.load();
         SecurityKeyPairTool.loadKeyPair(configuration.getKeypairAlgorithm());
+        byte[] digest = MessageDigest.getInstance("SHA-256").digest(SecurityKeyPairTool.getPublicKey().getEncoded());
         byte[] dat = new byte[12];
-        System.arraycopy(SecurityKeyPairTool.getPublicKey().getEncoded(), 0, dat, 0, dat.length);
+        System.arraycopy(digest, 0, dat, 0, dat.length);
         BSONObject object = new BasicBSONObject();
         object.put("SERVER_CODE", Base64.getEncoder().encodeToString(dat));
         object.put("AKE_ALGORITHM", configuration.getKeypairAlgorithm());

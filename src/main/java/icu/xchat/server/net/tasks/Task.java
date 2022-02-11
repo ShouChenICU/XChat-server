@@ -24,13 +24,6 @@ public interface Task {
     Task setTaskId(int taskId);
 
     /**
-     * 获取任务进度
-     *
-     * @return 任务进度
-     */
-    double getProgress();
-
-    /**
      * 处理一个包
      *
      * @param packetBody 包

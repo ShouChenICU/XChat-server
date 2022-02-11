@@ -2,6 +2,7 @@ package icu.xchat.server.net.tasks;
 
 import icu.xchat.server.GlobalVariables;
 import icu.xchat.server.database.DaoManager;
+import icu.xchat.server.entities.Identity;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.LoginException;
 import icu.xchat.server.net.Client;
@@ -40,7 +41,6 @@ public class UserLoginTask extends AbstractTask {
         if (client.getUserInfo() != null) {
             throw new LoginException("重复登陆");
         }
-        this.packetSum = 3;
         this.client = client;
     }
 
@@ -50,6 +50,9 @@ public class UserLoginTask extends AbstractTask {
         BSONObject bsonObject;
         switch (packetBody.getId()) {
             case 0:
+                /*
+                 * 验证通讯协议版本
+                 */
                 bsonObject = BsonUtils.decode(data);
                 if (!Objects.equals(GlobalVariables.PROTOCOL_VERSION, bsonObject.get("PROTOCOL_VERSION"))) {
                     bsonObject = new BasicBSONObject();
@@ -61,6 +64,9 @@ public class UserLoginTask extends AbstractTask {
                     throw new LoginException("通讯协议版本错误");
                 }
                 client.getPackageUtils().setDecryptCipher(EncryptUtils.getDecryptCipher());
+                /*
+                 * 发送服务器公钥
+                 */
                 PacketBody finalPacket = new PacketBody()
                         .setTaskId(this.taskId)
                         .setId(0)
@@ -68,6 +74,9 @@ public class UserLoginTask extends AbstractTask {
                 WorkerThreadPool.execute(() -> client.postPacket(finalPacket));
                 break;
             case 1:
+                /*
+                 * 设置对称密钥，建立安全信道
+                 */
                 client.getPackageUtils().setEncryptKey(new SecretKeySpec(packetBody.getData(), "AES"));
                 finalPacket = new PacketBody()
                         .setTaskId(this.taskId)
@@ -86,8 +95,25 @@ public class UserLoginTask extends AbstractTask {
                             .setData(BsonUtils.encode(bsonObject)));
                     throw new LoginException("用户不存在");
                 }
+                /*
+                 * 找到用户，验证此用户的属性签名
+                 */
+                Identity identity = new Identity()
+                        .setAttributes(userInfo.getAttributeMap())
+                        .setTimeStamp(userInfo.getTimeStamp())
+                        .setSignature(userInfo.getSignature())
+                        .setPublicKey(publicKey);
+                /*
+                 * 如果验证失败，将时间戳置最小值，等待客户端发起身份同步以覆盖错误的数据
+                 */
+                if (!identity.checkSignature()) {
+                    userInfo.setTimeStamp(Long.MIN_VALUE);
+                }
                 Cipher cipher = EncryptUtils.getEncryptCipher("RSA", publicKey);
-                genAuthCode();
+                /*
+                 * 生成随机验证码并用客户的公钥加密发给客户
+                 */
+                this.authCode = genAuthCode();
                 finalPacket = new PacketBody()
                         .setTaskId(this.taskId)
                         .setId(2)
@@ -95,6 +121,9 @@ public class UserLoginTask extends AbstractTask {
                 WorkerThreadPool.execute(() -> client.postPacket(finalPacket));
                 break;
             case 3:
+                /*
+                 * 验证用户的合法身份
+                 */
                 if (Arrays.equals(authCode, data)) {
                     client.setUserInfo(this.userInfo);
                 } else {
@@ -106,6 +135,13 @@ public class UserLoginTask extends AbstractTask {
                             .setData(BsonUtils.encode(bsonObject)));
                     throw new LoginException("用户身份验证失败");
                 }
+                /*
+                 * 验证成功，告诉客户登陆完毕
+                 */
+                finalPacket = new PacketBody()
+                        .setTaskId(this.taskId)
+                        .setId(3);
+                WorkerThreadPool.execute(() -> client.postPacket(finalPacket));
                 done();
                 break;
         }
@@ -124,10 +160,11 @@ public class UserLoginTask extends AbstractTask {
         return Base64.getEncoder().encodeToString(part);
     }
 
-    private void genAuthCode() {
+    private byte[] genAuthCode() {
         Random random = new Random();
-        this.authCode = new byte[random.nextInt(5) + 10];
+        byte[] authCode = new byte[random.nextInt(5) + 10];
         random.nextBytes(authCode);
+        return authCode;
     }
 
     @Override

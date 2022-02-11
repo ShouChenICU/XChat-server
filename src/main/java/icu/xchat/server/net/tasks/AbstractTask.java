@@ -28,18 +28,15 @@ public abstract class AbstractTask implements Task {
     protected Client client;
     protected int taskId;
     protected int packetCount;
-    protected int packetSum;
     protected ProgressCallBack progressCallBack;
 
     public AbstractTask() {
         this.packetCount = 0;
-        this.packetSum = 0;
         this.progressCallBack = EMPTY_PROGRESS_CALLBACK;
     }
 
     public AbstractTask(ProgressCallBack progressCallBack) {
         this.packetCount = 0;
-        this.packetSum = 0;
         this.progressCallBack = progressCallBack;
         progressCallBack.startProgress();
     }
@@ -53,11 +50,6 @@ public abstract class AbstractTask implements Task {
     public AbstractTask setTaskId(int taskId) {
         this.taskId = taskId;
         return this;
-    }
-
-    @Override
-    public double getProgress() {
-        return (double) packetCount / packetSum;
     }
 
     @Override
