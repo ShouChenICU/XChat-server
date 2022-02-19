@@ -171,7 +171,7 @@ public class Client {
         }
         int id;
         synchronized (taskMap) {
-            id = this.taskId++;
+            id = this.taskId--;
             taskMap.put(id, task);
         }
         task.setTaskId(id);
@@ -195,12 +195,12 @@ public class Client {
      */
     public void postPacket(PacketBody packetBody) {
         try {
-            byte[] dat = packageUtils.encodePacket(packetBody);
-            int length = dat.length;
-            if (length > 65535) {
-                throw new PacketException("包长度错误 " + length);
-            }
             synchronized (channel) {
+                byte[] dat = packageUtils.encodePacket(packetBody);
+                int length = dat.length;
+                if (length > 65535) {
+                    throw new PacketException("包长度错误 " + length);
+                }
                 writeBuffer.put((byte) (length % 256))
                         .put((byte) (length / 256));
                 int offset = 0;

@@ -77,7 +77,9 @@ public class UserLoginTask extends AbstractTask {
                 /*
                  * 设置对称密钥，建立安全信道
                  */
-                client.getPackageUtils().setEncryptKey(new SecretKeySpec(packetBody.getData(), "AES"));
+                bsonObject = BsonUtils.decode(packetBody.getData());
+                client.getPackageUtils().setEncryptKey(new SecretKeySpec((byte[]) bsonObject.get("KEY"), "AES"), (byte[]) bsonObject.get("ENCRYPT_IV"));
+                client.getPackageUtils().setDecryptIV((byte[]) bsonObject.get("DECRYPT_IV"));
                 finalPacket = new PacketBody()
                         .setTaskId(this.taskId)
                         .setId(1);
