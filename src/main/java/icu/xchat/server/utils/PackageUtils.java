@@ -5,6 +5,7 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,7 @@ import java.util.zip.DataFormatException;
  * @author shouchen
  */
 public class PackageUtils {
+    private static final String ENCRYPT_ALGORITHM = "AES/GCM/NoPadding";
     private static final int T_LEN = 128;
     private SecretKey key;
     private Cipher encryptCipher;
@@ -26,9 +28,12 @@ public class PackageUtils {
     public PackageUtils() {
     }
 
-    public PackageUtils setEncryptKey(SecretKey key, byte[] iv) {
+    public PackageUtils initCrypto(SecretKey key, byte[] encryptIV, byte[] decryptIV) throws NoSuchPaddingException, NoSuchAlgorithmException {
         this.key = key;
-        this.encryptIV = iv;
+        this.encryptIV = encryptIV;
+        this.decryptIV = decryptIV;
+        this.encryptCipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
+        this.decryptCipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
         return this;
     }
 
@@ -60,7 +65,7 @@ public class PackageUtils {
         object.put("DATA", packetBody.getData());
         byte[] data;
         if (this.key != null) {
-            this.encryptCipher = EncryptUtils.getEncryptCipher(key, encryptIV);
+            this.encryptCipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(T_LEN, encryptIV));
             byte[] iv = EncryptUtils.genIV();
             object.put("IV", iv);
             this.encryptIV = iv;
@@ -78,7 +83,7 @@ public class PackageUtils {
     public PacketBody decodePacket(byte[] data) throws IllegalBlockSizeException, BadPaddingException, DataFormatException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
         BSONObject object;
         if (this.key != null) {
-            this.decryptCipher = EncryptUtils.getDecryptCipher(key, decryptIV);
+            this.decryptCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(T_LEN, decryptIV));
             data = decryptCipher.doFinal(data);
             data = CompressionUtils.deCompress(data);
             object = BsonUtils.decode(data);
