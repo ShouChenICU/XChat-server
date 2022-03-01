@@ -150,6 +150,7 @@ public class UserLoginTask extends AbstractTask {
 
     @Override
     public void done() {
+        super.done();
         LOGGER.info("用户 {} 登陆成功\n", userInfo.getUidCode());
         client.removeTask(this.taskId);
     }

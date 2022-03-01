@@ -57,7 +57,7 @@ public class PackageUtils {
         return this;
     }
 
-    public byte[] encodePacket(PacketBody packetBody) throws IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    public byte[] encodePacket(PacketBody packetBody) throws IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
         BSONObject object = new BasicBSONObject();
         object.put("TASK_ID", packetBody.getTaskId());
         object.put("ID", packetBody.getId());
@@ -80,7 +80,7 @@ public class PackageUtils {
         return data;
     }
 
-    public PacketBody decodePacket(byte[] data) throws IllegalBlockSizeException, BadPaddingException, DataFormatException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    public PacketBody decodePacket(byte[] data) throws IllegalBlockSizeException, BadPaddingException, DataFormatException, InvalidAlgorithmParameterException, InvalidKeyException {
         BSONObject object;
         if (this.key != null) {
             this.decryptCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(T_LEN, decryptIV));

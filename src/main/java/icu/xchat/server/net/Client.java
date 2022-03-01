@@ -42,8 +42,8 @@ public class Client {
 
     public Client(SocketChannel channel) throws IOException {
         this.channel = channel;
-        this.readBuffer = ByteBuffer.allocateDirect(256);
-        this.writeBuffer = ByteBuffer.allocateDirect(256);
+        this.readBuffer = ByteBuffer.allocateDirect(512);
+        this.writeBuffer = ByteBuffer.allocateDirect(512);
         this.taskMap = new ConcurrentHashMap<>();
         this.userInfo = null;
         this.packageUtils = new PackageUtils();

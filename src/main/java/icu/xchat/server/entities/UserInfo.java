@@ -9,6 +9,10 @@ import java.util.Map;
  */
 public class UserInfo {
     /**
+     * 用户索引id
+     */
+    private Integer uid;
+    /**
      * 用户唯一识别码
      */
     private String uidCode;
@@ -36,6 +40,15 @@ public class UserInfo {
      * 用户属性
      */
     private Map<String, String> attributeMap;
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public UserInfo setUid(Integer uid) {
+        this.uid = uid;
+        return this;
+    }
 
     public String getUidCode() {
         return uidCode;

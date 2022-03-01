@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 07/02/2022 19:56:50
+ Date: 01/03/2022 13:20:10
 */
 
 PRAGMA foreign_keys = false;
@@ -20,13 +20,13 @@ PRAGMA foreign_keys = false;
 -- ----------------------------
 DROP TABLE IF EXISTS "r_members";
 CREATE TABLE "r_members" (
-  "room_id" integer NOT NULL,
+  "rid" integer NOT NULL,
   "uid" integer NOT NULL,
   "role" text NOT NULL DEFAULT '',
   "permissions" integer NOT NULL DEFAULT 7,
   "join_time" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("room_id", "uid"),
-  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  PRIMARY KEY ("rid", "uid"),
+  CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("rid") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -101,17 +101,26 @@ CREATE TABLE "t_messages" (
 );
 
 -- ----------------------------
+-- Table structure for t_room_attributes
+-- ----------------------------
+DROP TABLE IF EXISTS "t_room_attributes";
+CREATE TABLE "t_room_attributes" (
+  "rid" integer NOT NULL,
+  "key" text NOT NULL,
+  "value" text,
+  PRIMARY KEY ("rid", "key"),
+  CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("rid") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ----------------------------
 -- Table structure for t_rooms
 -- ----------------------------
 DROP TABLE IF EXISTS "t_rooms";
 CREATE TABLE "t_rooms" (
-  "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "topic" text NOT NULL,
-  "file_id" integer NOT NULL,
-  "description" text NOT NULL DEFAULT '',
+  "rid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "rid_code" text NOT NULL,
   "delete_mark" integer NOT NULL DEFAULT 0,
-  "creation_time" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "file_id" FOREIGN KEY ("file_id") REFERENCES "t_files" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+  "creation_time" integer NOT NULL DEFAULT 0
 );
 
 -- ----------------------------
@@ -149,31 +158,5 @@ CREATE TABLE "t_users" (
   "signature" text NOT NULL DEFAULT '',
   "time_stamp" integer NOT NULL DEFAULT 0
 );
-
--- ----------------------------
--- Auto increment value for t_files
--- ----------------------------
-
--- ----------------------------
--- Auto increment value for t_mails
--- ----------------------------
-
--- ----------------------------
--- Auto increment value for t_messages
--- ----------------------------
-
--- ----------------------------
--- Auto increment value for t_rooms
--- ----------------------------
-
--- ----------------------------
--- Auto increment value for t_titles
--- ----------------------------
-UPDATE "main"."sqlite_sequence" SET seq = 1 WHERE name = 't_titles';
-
--- ----------------------------
--- Auto increment value for t_users
--- ----------------------------
-UPDATE "main"."sqlite_sequence" SET seq = 1 WHERE name = 't_users';
 
 PRAGMA foreign_keys = true;
