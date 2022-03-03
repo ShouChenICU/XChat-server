@@ -66,12 +66,28 @@ public class DispatchCenter {
         synchronized (onlineClientList) {
             onlineClientList.add(client);
         }
+        heartTest(client);
         timerExecutor.schedule(() -> {
             if (!client.isLogin()) {
                 kick(client, "登陆超时");
                 closeClient(client);
             }
         }, 5, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 心跳检测
+     *
+     * @param client 客户
+     */
+    private void heartTest(Client client) {
+        if (System.currentTimeMillis() - client.getHeartTime() > 30000) {
+            if (client.getChannel().isConnected()) {
+                closeClient(client);
+            }
+        } else {
+            timerExecutor.schedule(() -> heartTest(client), 10, TimeUnit.SECONDS);
+        }
     }
 
     /**

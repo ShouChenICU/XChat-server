@@ -17,14 +17,6 @@ public class UserInfo {
      */
     private String uidCode;
     /**
-     * 经验
-     */
-    private Integer exp;
-    /**
-     * 等级
-     */
-    private Integer level;
-    /**
      * 状态
      */
     private Integer status;
@@ -56,24 +48,6 @@ public class UserInfo {
 
     public UserInfo setUidCode(String uidCode) {
         this.uidCode = uidCode;
-        return this;
-    }
-
-    public Integer getExp() {
-        return exp;
-    }
-
-    public UserInfo setExp(Integer exp) {
-        this.exp = exp;
-        return this;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public UserInfo setLevel(Integer level) {
-        this.level = level;
         return this;
     }
 

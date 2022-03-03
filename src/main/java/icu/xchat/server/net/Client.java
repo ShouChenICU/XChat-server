@@ -199,7 +199,7 @@ public class Client {
                 byte[] dat = packageUtils.encodePacket(packetBody);
                 int length = dat.length;
                 if (length > 65535) {
-                    throw new PacketException("包长度错误 " + length);
+                    throw new PacketException("包长度超限: " + length);
                 }
                 writeBuffer.put((byte) (length % 256))
                         .put((byte) (length / 256));
@@ -231,6 +231,10 @@ public class Client {
             LOGGER.warn("", e);
             DispatchCenter.getInstance().closeClient(this);
         }
+    }
+
+    public long getHeartTime() {
+        return heartTime;
     }
 
     @Override

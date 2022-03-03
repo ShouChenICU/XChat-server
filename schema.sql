@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 01/03/2022 13:20:10
+ Date: 03/03/2022 21:06:29
 */
 
 PRAGMA foreign_keys = false;
@@ -97,7 +97,7 @@ CREATE TABLE "t_messages" (
   "delete_mark" integer NOT NULL DEFAULT 0,
   "time_stamp" integer NOT NULL DEFAULT 0,
   CONSTRAINT "sender_id" FOREIGN KEY ("sender_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("id") ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("rid") ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
 -- ----------------------------
@@ -118,7 +118,6 @@ CREATE TABLE "t_room_attributes" (
 DROP TABLE IF EXISTS "t_rooms";
 CREATE TABLE "t_rooms" (
   "rid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "rid_code" text NOT NULL,
   "delete_mark" integer NOT NULL DEFAULT 0,
   "creation_time" integer NOT NULL DEFAULT 0
 );
@@ -152,8 +151,6 @@ DROP TABLE IF EXISTS "t_users";
 CREATE TABLE "t_users" (
   "uid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "uid_code" text NOT NULL,
-  "level" integer NOT NULL DEFAULT 0,
-  "exp" integer NOT NULL DEFAULT 0,
   "status" integer NOT NULL DEFAULT 0,
   "signature" text NOT NULL DEFAULT '',
   "time_stamp" integer NOT NULL DEFAULT 0
