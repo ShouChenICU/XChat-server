@@ -1,14 +1,20 @@
 package icu.xchat.server.net.tasks;
 
+import icu.xchat.server.database.DaoManager;
+import icu.xchat.server.entities.Identity;
 import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
+import icu.xchat.server.utils.IdentityUtils;
 import icu.xchat.server.utils.TaskTypes;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
+import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,7 +38,7 @@ public class IdentitySyncTask extends AbstractTask {
      * @param packetBody 包
      */
     @Override
-    public void handlePacket(PacketBody packetBody) {
+    public void handlePacket(PacketBody packetBody) throws Exception {
         if (Objects.equals(packetBody.getTaskType(), TaskTypes.ERROR)) {
             terminate((String) BsonUtils.decode(packetBody.getData()).get("ERR_MSG"));
             return;
@@ -40,6 +46,11 @@ public class IdentitySyncTask extends AbstractTask {
         if (packetBody.getId() == 0) {
             BSONObject object = BsonUtils.decode(packetBody.getData());
             byte[] pubKey = (byte[]) object.get("PUBLIC_KEY");
+            if (!Objects.equals(client.getUserInfo().getUidCode(), IdentityUtils.getUidCodeByPublicKeyCode(pubKey))) {
+                throw new Exception("身份不匹配！");
+            }
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            this.publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(pubKey));
             long timeStamp = (Long) object.get("TIMESTAMP");
             /*
              * 根据用户发过来的时间戳决定同步方向
@@ -132,11 +143,28 @@ public class IdentitySyncTask extends AbstractTask {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void done() {
         super.done();
         if (isDownload) {
+            BSONObject object = BsonUtils.decode(identityData);
+            Identity identity = new Identity()
+                    .setAttributes((Map<String, String>) object.get("ATTRIBUTES"))
+                    .setTimeStamp((Long) object.get("TIMESTAMP"))
+                    .setSignature((String) object.get("SIGNATURE"))
+                    .setPublicKey(publicKey);
+            if (identity.checkSignature()) {
+                client.getUserInfo().setAttributeMap(identity.getAttributes());
+                client.getUserInfo().setTimeStamp(identity.getTimeStamp());
+                client.getUserInfo().setSignature(identity.getSignature());
+                DaoManager.getUserInfoDao().updateUserInfo(client.getUserInfo());
 
+                System.out.println(identity);
+
+            } else {
+                progressCallBack.terminate("身份验证失败，拒绝同步！");
+            }
         }
         client.removeTask(this.taskId);
     }

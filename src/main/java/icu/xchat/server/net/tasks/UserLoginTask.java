@@ -8,10 +8,7 @@ import icu.xchat.server.exceptions.LoginException;
 import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
-import icu.xchat.server.utils.BsonUtils;
-import icu.xchat.server.utils.EncryptUtils;
-import icu.xchat.server.utils.SecurityKeyPairTool;
-import icu.xchat.server.utils.TaskTypes;
+import icu.xchat.server.utils.*;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.slf4j.Logger;
@@ -19,11 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Random;
 
@@ -86,7 +80,7 @@ public class UserLoginTask extends AbstractTask {
                 break;
             case 2:
                 PublicKey publicKey = EncryptUtils.getPublicKey("RSA", data);
-                userInfo = DaoManager.getUserInfoDao().getUserInfoByUidCode(getUidCode(publicKey.getEncoded()));
+                userInfo = DaoManager.getUserInfoDao().getUserInfoByUidCode(IdentityUtils.getUidCodeByPublicKeyCode(publicKey.getEncoded()));
                 if (userInfo == null) {
                     bsonObject = new BasicBSONObject();
                     bsonObject.put("ERR_MSG", "用户不存在");
@@ -153,13 +147,6 @@ public class UserLoginTask extends AbstractTask {
         super.done();
         LOGGER.info("用户 {} 登陆成功\n", userInfo.getUidCode());
         client.removeTask(this.taskId);
-    }
-
-    private String getUidCode(byte[] encode) throws NoSuchAlgorithmException {
-        byte[] digest = MessageDigest.getInstance("SHA-512").digest();
-        byte[] part = new byte[12];
-        System.arraycopy(digest, 0, part, 0, 12);
-        return Base64.getEncoder().encodeToString(part);
     }
 
     private byte[] genAuthCode() {

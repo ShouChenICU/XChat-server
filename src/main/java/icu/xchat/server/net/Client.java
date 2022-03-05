@@ -3,10 +3,7 @@ package icu.xchat.server.net;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.PacketException;
 import icu.xchat.server.exceptions.TaskException;
-import icu.xchat.server.net.tasks.CommandTask;
-import icu.xchat.server.net.tasks.IdentitySyncTask;
-import icu.xchat.server.net.tasks.Task;
-import icu.xchat.server.net.tasks.UserLoginTask;
+import icu.xchat.server.net.tasks.*;
 import icu.xchat.server.utils.PackageUtils;
 import icu.xchat.server.utils.TaskTypes;
 import org.slf4j.Logger;
@@ -154,7 +151,7 @@ public class Client {
             task.handlePacket(packetBody);
         } else {
             if (Objects.equals(packetBody.getTaskType(), TaskTypes.LOGOUT)) {
-                throw new Exception("");
+                throw new Exception("logout");
             }
         }
     }
@@ -165,6 +162,7 @@ public class Client {
      * @param task 任务
      */
     public void addTask(Task task) throws TaskException {
+        ((AbstractTask) task).setClient(this);
         PacketBody packetBody = task.startPacket();
         if (packetBody == null) {
             throw new TaskException("起步包为空");

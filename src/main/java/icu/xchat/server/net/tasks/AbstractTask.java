@@ -41,6 +41,15 @@ public abstract class AbstractTask implements Task {
         progressCallBack.startProgress();
     }
 
+    public AbstractTask setClient(Client client) {
+        this.client = client;
+        return this;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
     @Override
     public int getTaskId() {
         return taskId;

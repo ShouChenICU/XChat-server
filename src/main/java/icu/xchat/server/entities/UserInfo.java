@@ -1,5 +1,6 @@
 package icu.xchat.server.entities;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,6 +33,10 @@ public class UserInfo {
      * 用户属性
      */
     private Map<String, String> attributeMap;
+
+    public UserInfo() {
+        this.attributeMap = new HashMap<>();
+    }
 
     public Integer getUid() {
         return uid;

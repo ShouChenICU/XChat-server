@@ -21,4 +21,16 @@ public class UserInfoDaoImpl implements UserInfoDao {
                 .setUidCode(uidCode)
                 .setTimeStamp(0L);
     }
+
+    /**
+     * 更新用户信息
+     *
+     * @param userInfo 用户信息
+     * @return 结果
+     */
+    @Override
+    public boolean updateUserInfo(UserInfo userInfo) {
+        // TODO: 2022/3/5
+        return true;
+    }
 }

@@ -1,6 +1,5 @@
 package icu.xchat.server.net.tasks;
 
-import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 
 /**
@@ -10,8 +9,7 @@ import icu.xchat.server.net.PacketBody;
  */
 public class MessageReceiveTask extends AbstractTask {
 
-    public MessageReceiveTask(Client client) {
-        this.client = client;
+    public MessageReceiveTask() {
     }
 
     /**

@@ -1,5 +1,6 @@
 package icu.xchat.server.entities;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,6 +22,10 @@ public class ChatRoomInfo {
      */
     private Long creation_time;
 
+    public ChatRoomInfo() {
+        this.attributeMap = new HashMap<>();
+    }
+
     public Integer getRid() {
         return rid;
     }
@@ -36,6 +41,20 @@ public class ChatRoomInfo {
 
     public ChatRoomInfo setAttributeMap(Map<String, String> attributeMap) {
         this.attributeMap = attributeMap;
+        return this;
+    }
+
+    public String getAttribute(String key) {
+        return attributeMap.get(key);
+    }
+
+    public ChatRoomInfo setAttribute(String key, String value) {
+        this.attributeMap.put(key, value);
+        return this;
+    }
+
+    public ChatRoomInfo removeAttribute(String key) {
+        this.attributeMap.remove(key);
         return this;
     }
 

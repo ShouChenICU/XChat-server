@@ -15,4 +15,12 @@ public interface UserInfoDao {
      * @return 用户信息实体
      */
     UserInfo getUserInfoByUidCode(String uidCode);
+
+    /**
+     * 更新用户信息
+     *
+     * @param userInfo 用户信息
+     * @return 结果
+     */
+    boolean updateUserInfo(UserInfo userInfo);
 }
