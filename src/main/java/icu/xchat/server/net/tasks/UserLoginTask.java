@@ -5,17 +5,16 @@ import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.LoginException;
-import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.*;
 import org.bson.BSONObject;
-import org.bson.BasicBSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,11 +30,10 @@ public class UserLoginTask extends AbstractTask {
     private UserInfo userInfo;
     private byte[] authCode;
 
-    public UserLoginTask(Client client) throws LoginException {
+    public UserLoginTask() throws LoginException {
         if (client.getUserInfo() != null) {
             throw new LoginException("重复登陆");
         }
-        this.client = client;
     }
 
     @Override
@@ -49,12 +47,10 @@ public class UserLoginTask extends AbstractTask {
                  */
                 bsonObject = BsonUtils.decode(data);
                 if (!Objects.equals(GlobalVariables.PROTOCOL_VERSION, bsonObject.get("PROTOCOL_VERSION"))) {
-                    bsonObject = new BasicBSONObject();
-                    bsonObject.put("ERR_MSG", "通讯协议版本错误");
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)
                             .setTaskType(TaskTypes.ERROR)
-                            .setData(BsonUtils.encode(bsonObject)));
+                            .setData("通讯协议版本错误".getBytes(StandardCharsets.UTF_8)));
                     throw new LoginException("通讯协议版本错误");
                 }
                 client.getPackageUtils().setDecryptCipher(EncryptUtils.getDecryptCipher());
@@ -82,12 +78,10 @@ public class UserLoginTask extends AbstractTask {
                 PublicKey publicKey = EncryptUtils.getPublicKey("RSA", data);
                 userInfo = DaoManager.getUserInfoDao().getUserInfoByUidCode(IdentityUtils.getUidCodeByPublicKeyCode(publicKey.getEncoded()));
                 if (userInfo == null) {
-                    bsonObject = new BasicBSONObject();
-                    bsonObject.put("ERR_MSG", "用户不存在");
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)
                             .setTaskType(TaskTypes.ERROR)
-                            .setData(BsonUtils.encode(bsonObject)));
+                            .setData("用户不存在".getBytes(StandardCharsets.UTF_8)));
                     throw new LoginException("用户不存在");
                 }
                 /*
@@ -122,12 +116,10 @@ public class UserLoginTask extends AbstractTask {
                 if (Arrays.equals(authCode, data)) {
                     client.setUserInfo(this.userInfo);
                 } else {
-                    bsonObject = new BasicBSONObject();
-                    bsonObject.put("ERR_MSG", "用户身份验证失败");
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)
                             .setTaskType(TaskTypes.ERROR)
-                            .setData(BsonUtils.encode(bsonObject)));
+                            .setData("用户身份验证失败".getBytes(StandardCharsets.UTF_8)));
                     throw new LoginException("用户身份验证失败");
                 }
                 /*

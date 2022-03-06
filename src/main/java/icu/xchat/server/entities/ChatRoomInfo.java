@@ -8,11 +8,16 @@ import java.util.Map;
  *
  * @author shouchen
  */
+@SuppressWarnings("unused")
 public class ChatRoomInfo {
     /**
      * 房间id
      */
     private Integer rid;
+    /**
+     * 成员map
+     */
+    private Map<String, MemberInfo> memberInfoMap;
     /**
      * 属性集
      */
@@ -24,6 +29,7 @@ public class ChatRoomInfo {
 
     public ChatRoomInfo() {
         this.attributeMap = new HashMap<>();
+        this.memberInfoMap = new HashMap<>();
     }
 
     public Integer getRid() {
@@ -32,6 +38,15 @@ public class ChatRoomInfo {
 
     public ChatRoomInfo setRid(Integer rid) {
         this.rid = rid;
+        return this;
+    }
+
+    public Map<String, MemberInfo> getMemberInfoMap() {
+        return memberInfoMap;
+    }
+
+    public ChatRoomInfo setMemberInfoMap(Map<String, MemberInfo> memberInfoMap) {
+        this.memberInfoMap = memberInfoMap;
         return this;
     }
 

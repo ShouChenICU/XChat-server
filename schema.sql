@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 03/03/2022 21:06:29
+ Date: 06/03/2022 09:06:27
 */
 
 PRAGMA foreign_keys = false;
@@ -21,13 +21,13 @@ PRAGMA foreign_keys = false;
 DROP TABLE IF EXISTS "r_members";
 CREATE TABLE "r_members" (
   "rid" integer NOT NULL,
-  "uid" integer NOT NULL,
+  "uid_code" text NOT NULL,
   "role" text NOT NULL DEFAULT '',
-  "permissions" integer NOT NULL DEFAULT 7,
+  "permission" integer NOT NULL DEFAULT 7,
   "join_time" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("rid", "uid"),
+  PRIMARY KEY ("rid", "uid_code"),
   CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("rid") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "uid_code" FOREIGN KEY ("uid_code") REFERENCES "t_users" ("uid_code") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ----------------------------

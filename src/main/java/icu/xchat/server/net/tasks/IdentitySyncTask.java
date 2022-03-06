@@ -2,7 +2,6 @@ package icu.xchat.server.net.tasks;
 
 import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
-import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
@@ -11,6 +10,7 @@ import icu.xchat.server.utils.TaskTypes;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -28,8 +28,7 @@ public class IdentitySyncTask extends AbstractTask {
     private byte[] identityData;
     private int processedSize;
 
-    public IdentitySyncTask(Client client) {
-        this.client = client;
+    public IdentitySyncTask() {
     }
 
     /**
@@ -40,7 +39,7 @@ public class IdentitySyncTask extends AbstractTask {
     @Override
     public void handlePacket(PacketBody packetBody) throws Exception {
         if (Objects.equals(packetBody.getTaskType(), TaskTypes.ERROR)) {
-            terminate((String) BsonUtils.decode(packetBody.getData()).get("ERR_MSG"));
+            terminate(new String(packetBody.getData(), StandardCharsets.UTF_8));
             return;
         }
         if (packetBody.getId() == 0) {
@@ -99,6 +98,14 @@ public class IdentitySyncTask extends AbstractTask {
             }
         } else if (packetBody.getId() == 1) {
             int size = (int) BsonUtils.decode(packetBody.getData()).get("SIZE");
+            if (size > 16 * 1024 * 1024) {
+                WorkerThreadPool.execute(() -> client.postPacket(new PacketBody()
+                        .setTaskId(this.taskId)
+                        .setTaskType(TaskTypes.ERROR)
+                        .setData("数据大小超限！".getBytes(StandardCharsets.UTF_8))));
+                this.terminate("数据大小超限！");
+                return;
+            }
             this.identityData = new byte[size];
             this.processedSize = 0;
         } else if (isDownload) {
@@ -159,9 +166,6 @@ public class IdentitySyncTask extends AbstractTask {
                 client.getUserInfo().setTimeStamp(identity.getTimeStamp());
                 client.getUserInfo().setSignature(identity.getSignature());
                 DaoManager.getUserInfoDao().updateUserInfo(client.getUserInfo());
-
-                System.out.println(identity);
-
             } else {
                 progressCallBack.terminate("身份验证失败，拒绝同步！");
             }

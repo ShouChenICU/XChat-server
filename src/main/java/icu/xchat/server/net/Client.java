@@ -132,20 +132,19 @@ public class Client {
             if (task == null) {
                 switch (packetBody.getTaskType()) {
                     case TaskTypes.COMMAND:
-                        task = new CommandTask()
-                                .setTaskId(packetBody.getTaskId());
+                        task = new CommandTask();
                         break;
                     case TaskTypes.LOGIN:
-                        task = new UserLoginTask(this)
-                                .setTaskId(packetBody.getTaskId());
+                        task = new UserLoginTask();
                         break;
                     case TaskTypes.IDENTITY_SYNC:
-                        task = new IdentitySyncTask(this)
-                                .setTaskId(packetBody.getTaskId());
+                        task = new IdentitySyncTask();
                         break;
                     default:
                         throw new TaskException("未知任务类型");
                 }
+                task.setTaskId(packetBody.getTaskId());
+                ((AbstractTask) task).setClient(this);
                 taskMap.put(packetBody.getTaskId(), task);
             }
             task.handlePacket(packetBody);

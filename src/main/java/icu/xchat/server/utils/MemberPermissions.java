@@ -11,11 +11,11 @@ public class MemberPermissions {
      */
     public static final int PERMISSION_UTTER = 1;
     /**
-     * 下载文件权限
-     */
-    public static final int PERMISSION_FILE_DOWNLOAD = 2;
-    /**
      * 上传文件权限
      */
-    public static final int PERMISSION_FILE_UPLOAD = 4;
+    public static final int PERMISSION_FILE_UPLOAD = 2;
+    /**
+     * 下载文件权限
+     */
+    public static final int PERMISSION_FILE_DOWNLOAD = 4;
 }
