@@ -29,7 +29,7 @@
 			<maxHistory>90</maxHistory>
 			<!--日志最大的文件大小 -->
 			<maxFileSize>16MB</maxFileSize>
-			<!--日志最大保存100MB -->
+			<!--日志最大保存256MB -->
 			<totalSizeCap>256MB</totalSizeCap>
 		</rollingPolicy>
 	</appender>

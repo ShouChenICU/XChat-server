@@ -1,9 +1,9 @@
 package icu.xchat.server.net;
 
+import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.*;
-import icu.xchat.server.constants.TaskTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class Client extends NetNode {
                         task = new CommandTask();
                         break;
                     case TaskTypes.LOGIN:
-                        task = new UserLoginTask();
+                        task = new UserLoginTask(this);
                         break;
                     case TaskTypes.IDENTITY_SYNC:
                         task = new IdentitySyncTask();
@@ -113,6 +113,14 @@ public class Client extends NetNode {
      */
     public void removeTask(int taskId) {
         this.taskMap.remove(taskId);
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        for (Task task : taskMap.values()) {
+            task.terminate("Closed");
+        }
     }
 
     @Override

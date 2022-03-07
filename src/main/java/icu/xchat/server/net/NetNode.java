@@ -99,6 +99,7 @@ public abstract class NetNode {
     @SuppressWarnings("BusyWait")
     public void postPacket(PacketBody packetBody) throws Exception {
         synchronized (channel) {
+            writeBuffer.clear();
             byte[] dat = packageUtils.encodePacket(packetBody);
             int length = dat.length;
             if (length > 65535) {
@@ -108,11 +109,9 @@ public abstract class NetNode {
                     .put((byte) (length / 256));
             int offset = 0;
             while (offset < dat.length) {
-                if (writeBuffer.hasRemaining()) {
-                    length = Math.min(writeBuffer.remaining(), dat.length - offset);
-                    writeBuffer.put(dat, offset, length);
-                    offset += length;
-                }
+                length = Math.min(writeBuffer.remaining(), dat.length - offset);
+                writeBuffer.put(dat, offset, length);
+                offset += length;
                 writeBuffer.flip();
                 int waitCount = 0;
                 while (writeBuffer.hasRemaining()) {
@@ -134,5 +133,12 @@ public abstract class NetNode {
 
     public long getHeartTime() {
         return heartTime;
+    }
+
+    public void close() throws IOException {
+        this.selectionKey.cancel();
+        if (this.channel.isConnected()) {
+            this.channel.close();
+        }
     }
 }

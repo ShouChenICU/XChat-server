@@ -6,6 +6,7 @@ import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.LoginException;
+import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.*;
@@ -31,7 +32,7 @@ public class UserLoginTask extends AbstractTask {
     private UserInfo userInfo;
     private byte[] authCode;
 
-    public UserLoginTask() throws LoginException {
+    public UserLoginTask(Client client) throws LoginException {
         if (client.getUserInfo() != null) {
             throw new LoginException("重复登陆");
         }

@@ -105,12 +105,12 @@ public class DispatchCenter {
                 loginClientMap.remove(client.getUserInfo().getUidCode());
             }
         }
-        client.getSelectionKey().cancel();
-        NetCore.wakeup();
         try {
-            client.getChannel().close();
+            client.close();
         } catch (IOException e) {
             LOGGER.warn("", e);
+        } finally {
+            NetCore.wakeup();
         }
     }
 
