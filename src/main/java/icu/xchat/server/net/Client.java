@@ -1,63 +1,34 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.entities.UserInfo;
-import icu.xchat.server.exceptions.PacketException;
 import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.*;
-import icu.xchat.server.utils.PackageUtils;
 import icu.xchat.server.utils.TaskTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 /**
  * 网络客户端实体
  *
  * @author shouchen
  */
-public class Client {
+public class Client extends NetNode {
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
-    private SelectionKey selectionKey;
-    private final SocketChannel channel;
-    private final ByteBuffer readBuffer;
-    private final ByteBuffer writeBuffer;
     private final ConcurrentHashMap<Integer, Task> taskMap;
-    private final PackageUtils packageUtils;
     private UserInfo userInfo;
-    private long heartTime;
     private int taskId;
-    private int packetStatus;
-    private int packetLength;
-    private byte[] packetData;
+
 
     public Client(SocketChannel channel) throws IOException {
-        this.channel = channel;
-        this.readBuffer = ByteBuffer.allocateDirect(512);
-        this.writeBuffer = ByteBuffer.allocateDirect(512);
+        super(channel);
         this.taskMap = new ConcurrentHashMap<>();
         this.userInfo = null;
-        this.packageUtils = new PackageUtils();
-        this.heartTime = System.currentTimeMillis();
         this.taskId = -1;
-        this.packetStatus = 0;
-        this.packetLength = 0;
-        this.packetData = null;
-        this.selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
-    }
-
-    public SelectionKey getSelectionKey() {
-        return selectionKey;
-    }
-
-    public SocketChannel getChannel() {
-        return channel;
     }
 
     public boolean isLogin() {
@@ -73,60 +44,13 @@ public class Client {
         return this;
     }
 
-    public PackageUtils getPackageUtils() {
-        return packageUtils;
-    }
-
-    /**
-     * 读取并预处理数据
-     */
-    public void doRead() {
-        try {
-            int len;
-            while ((len = channel.read(readBuffer)) != 0) {
-                if (len == -1) {
-                    throw new IOException("通道关闭");
-                }
-                readBuffer.flip();
-                while (readBuffer.hasRemaining()) {
-                    switch (packetStatus) {
-                        case 0:
-                            packetLength = readBuffer.get() & 0xff;
-                            packetStatus = 1;
-                            break;
-                        case 1:
-                            packetLength += (readBuffer.get() & 0xff) << 8;
-                            packetData = new byte[packetLength];
-                            packetLength = 0;
-                            packetStatus = 2;
-                            break;
-                        case 2:
-                            for (; readBuffer.hasRemaining() && packetLength < packetData.length; packetLength++) {
-                                packetData[packetLength] = readBuffer.get();
-                            }
-                            if (packetLength == packetData.length) {
-                                handlePacket(packageUtils.decodePacket(packetData));
-                                packetStatus = 0;
-                            }
-                            break;
-                    }
-                }
-                readBuffer.clear();
-            }
-            selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
-        } catch (Exception e) {
-            LOGGER.warn("", e);
-            DispatchCenter.getInstance().closeClient(this);
-        }
-    }
-
     /**
      * 处理一个包
      *
      * @param packetBody 包
      */
-    private void handlePacket(PacketBody packetBody) throws Exception {
-        this.heartTime = System.currentTimeMillis();
+    @Override
+    protected void handlePacket(PacketBody packetBody) throws Exception {
         if (packetBody.getTaskId() != 0) {
             Task task = taskMap.get(packetBody.getTaskId());
             if (task == null) {
@@ -173,7 +97,13 @@ public class Client {
         }
         task.setTaskId(id);
         packetBody.setTaskId(id);
-        WorkerThreadPool.execute(() -> postPacket(packetBody));
+        WorkerThreadPool.execute(() -> {
+            try {
+                postPacket(packetBody);
+            } catch (Exception e) {
+                DispatchCenter.getInstance().closeClient(this);
+            }
+        });
     }
 
     /**
@@ -185,69 +115,21 @@ public class Client {
         this.taskMap.remove(taskId);
     }
 
-    /**
-     * 发送一个包
-     *
-     * @param packetBody 包
-     */
+    @Override
     public void postPacket(PacketBody packetBody) {
         try {
-            synchronized (channel) {
-                byte[] dat = packageUtils.encodePacket(packetBody);
-                int length = dat.length;
-                if (length > 65535) {
-                    throw new PacketException("包长度超限: " + length);
-                }
-                writeBuffer.put((byte) (length % 256))
-                        .put((byte) (length / 256));
-                int offset = 0;
-                while (offset < dat.length) {
-                    if (writeBuffer.hasRemaining()) {
-                        length = Math.min(writeBuffer.remaining(), dat.length - offset);
-                        writeBuffer.put(dat, offset, length);
-                        offset += length;
-                    }
-                    writeBuffer.flip();
-                    int waitCount = 0;
-                    while (writeBuffer.hasRemaining()) {
-                        if (channel.write(writeBuffer) == 0) {
-                            if (waitCount >= 10) {
-                                throw new TimeoutException("写入超时");
-                            }
-                            Thread.sleep(100);
-                            waitCount++;
-                        } else {
-                            waitCount = 0;
-                        }
-                    }
-                    writeBuffer.clear();
-                }
-            }
-            this.heartTime = System.currentTimeMillis();
+            super.postPacket(packetBody);
         } catch (Exception e) {
-            LOGGER.warn("", e);
             DispatchCenter.getInstance().closeClient(this);
         }
     }
 
-    public long getHeartTime() {
-        return heartTime;
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    public void doRead() {
+        try {
+            super.doRead();
+        } catch (Exception e) {
+            DispatchCenter.getInstance().closeClient(this);
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Client client = (Client) o;
-        return Objects.equals(channel, client.channel);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(channel);
     }
 }

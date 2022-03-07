@@ -82,8 +82,8 @@ public class NetCore {
         mainSelector.wakeup();
     }
 
-    public static SelectionKey register(SocketChannel channel, int ops, Client client) throws ClosedChannelException {
-        SelectionKey selectionKey = channel.register(mainSelector, ops, client);
+    public static SelectionKey register(SocketChannel channel, int ops, NetNode netNode) throws ClosedChannelException {
+        SelectionKey selectionKey = channel.register(mainSelector, ops, netNode);
         mainSelector.wakeup();
         return selectionKey;
     }
