@@ -1,7 +1,13 @@
 package icu.xchat.server.entities;
 
-import java.util.HashMap;
-import java.util.Map;
+import icu.xchat.server.constants.MemberPermissions;
+import icu.xchat.server.constants.MemberRoles;
+import icu.xchat.server.constants.RoomAttributes;
+import icu.xchat.server.utils.BsonUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
+
+import java.util.*;
 
 /**
  * 房间信息实体
@@ -9,7 +15,7 @@ import java.util.Map;
  * @author shouchen
  */
 @SuppressWarnings("unused")
-public class ChatRoomInfo {
+public class ChatRoomInfo implements Serialization {
     /**
      * 房间id
      */
@@ -42,7 +48,7 @@ public class ChatRoomInfo {
     }
 
     public Map<String, MemberInfo> getMemberInfoMap() {
-        return memberInfoMap;
+        return Collections.unmodifiableMap(memberInfoMap);
     }
 
     public ChatRoomInfo setMemberInfoMap(Map<String, MemberInfo> memberInfoMap) {
@@ -50,8 +56,17 @@ public class ChatRoomInfo {
         return this;
     }
 
+    public MemberInfo getMemberInfo(String uidCode) {
+        return memberInfoMap.get(uidCode);
+    }
+
+    public ChatRoomInfo addMember(MemberInfo memberInfo) {
+        this.memberInfoMap.put(memberInfo.getUidCode(), memberInfo);
+        return this;
+    }
+
     public Map<String, String> getAttributeMap() {
-        return attributeMap;
+        return Collections.unmodifiableMap(attributeMap);
     }
 
     public ChatRoomInfo setAttributeMap(Map<String, String> attributeMap) {
@@ -80,5 +95,55 @@ public class ChatRoomInfo {
     public ChatRoomInfo setCreation_time(Long creation_time) {
         this.creation_time = creation_time;
         return this;
+    }
+
+    /**
+     * 对象序列化
+     *
+     * @return 数据
+     */
+    @Override
+    public byte[] serialize() {
+        BSONObject object = new BasicBSONObject();
+        object.put("RID", rid);
+        List<byte[]> members = new ArrayList<>();
+        for (Map.Entry<String, MemberInfo> entry : memberInfoMap.entrySet()) {
+            members.add(entry.getValue().serialize());
+        }
+        object.put("MEMBERS", members);
+        object.put("ATTRIBUTES", attributeMap);
+        object.put("CREATION_TIME", creation_time);
+        return BsonUtils.encode(object);
+    }
+
+    /**
+     * 反序列化为对象
+     *
+     * @param data 数据
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void deserialize(byte[] data) {
+        BSONObject object = BsonUtils.decode(data);
+        this.rid = (Integer) object.get("RID");
+        this.memberInfoMap = new HashMap<>();
+        List<byte[]> members = (List<byte[]>) object.get("MEMBERS");
+        for (byte[] member : members) {
+            MemberInfo memberInfo = new MemberInfo();
+            memberInfo.deserialize(member);
+            this.addMember(memberInfo);
+        }
+        this.attributeMap = (Map<String, String>) object.get("ATTRIBUTES");
+        this.creation_time = (Long) object.get("CREATION_TIME");
+    }
+
+    @Override
+    public String toString() {
+        return "ChatRoomInfo{" +
+                "rid=" + rid +
+                ", memberInfoMap=" + memberInfoMap +
+                ", attributeMap=" + attributeMap +
+                ", creation_time=" + creation_time +
+                '}';
     }
 }

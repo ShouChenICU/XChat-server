@@ -3,7 +3,7 @@ package icu.xchat.server.net;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.*;
-import icu.xchat.server.utils.TaskTypes;
+import icu.xchat.server.constants.TaskTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

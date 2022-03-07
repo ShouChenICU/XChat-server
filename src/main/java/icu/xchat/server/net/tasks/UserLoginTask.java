@@ -1,6 +1,7 @@
 package icu.xchat.server.net.tasks;
 
 import icu.xchat.server.GlobalVariables;
+import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
 import icu.xchat.server.entities.UserInfo;

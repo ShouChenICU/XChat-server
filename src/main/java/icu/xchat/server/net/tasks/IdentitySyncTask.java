@@ -6,7 +6,7 @@ import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
 import icu.xchat.server.utils.IdentityUtils;
-import icu.xchat.server.utils.TaskTypes;
+import icu.xchat.server.constants.TaskTypes;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
@@ -29,6 +29,7 @@ public class IdentitySyncTask extends AbstractTask {
     private int processedSize;
 
     public IdentitySyncTask() {
+        super();
     }
 
     /**
@@ -153,7 +154,6 @@ public class IdentitySyncTask extends AbstractTask {
     @SuppressWarnings("unchecked")
     @Override
     public void done() {
-        super.done();
         if (isDownload) {
             BSONObject object = BsonUtils.decode(identityData);
             Identity identity = new Identity()
@@ -170,6 +170,7 @@ public class IdentitySyncTask extends AbstractTask {
                 progressCallBack.terminate("身份验证失败，拒绝同步！");
             }
         }
+        super.done();
         client.removeTask(this.taskId);
     }
 

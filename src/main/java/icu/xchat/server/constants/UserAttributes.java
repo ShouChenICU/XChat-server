@@ -1,4 +1,4 @@
-package icu.xchat.server.utils;
+package icu.xchat.server.constants;
 
 /**
  * 用户可用属性集

@@ -1,14 +1,20 @@
 package icu.xchat.server.entities;
 
+import icu.xchat.server.utils.BsonUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 用户信息
  *
  * @author shouchen
  */
-public class UserInfo {
+public class UserInfo implements Serialization {
     /**
      * 用户索引id
      */
@@ -84,11 +90,79 @@ public class UserInfo {
     }
 
     public Map<String, String> getAttributeMap() {
-        return attributeMap;
+        return Collections.unmodifiableMap(attributeMap);
     }
 
     public UserInfo setAttributeMap(Map<String, String> attributeMap) {
         this.attributeMap = attributeMap;
         return this;
+    }
+
+    public String getAttribute(String key) {
+        return attributeMap.get(key);
+    }
+
+    public UserInfo setAttribute(String key, String value) {
+        attributeMap.put(key, value);
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        UserInfo userInfo = (UserInfo) o;
+        return Objects.equals(uidCode, userInfo.uidCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uidCode);
+    }
+
+    @Override
+    public String toString() {
+        return "UserInfo{" +
+                "uid=" + uid +
+                ", uidCode='" + uidCode + '\'' +
+                ", status=" + status +
+                ", signature='" + signature + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", attributeMap=" + attributeMap +
+                '}';
+    }
+
+    /**
+     * 对象序列化
+     *
+     * @return 数据
+     */
+    @Override
+    public byte[] serialize() {
+        BSONObject object = new BasicBSONObject();
+        object.put("UID_CODE", uidCode);
+        object.put("ATTRIBUTES", attributeMap);
+        object.put("TIME_STAMP", timeStamp);
+        object.put("SIGNATURE", signature);
+        return BsonUtils.encode(object);
+    }
+
+    /**
+     * 反序列化为对象
+     *
+     * @param data 数据
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void deserialize(byte[] data) {
+        BSONObject object = BsonUtils.decode(data);
+        this.uidCode = (String) object.get("UID_CODE");
+        this.attributeMap = (Map<String, String>) object.get("ATTRIBUTES");
+        this.timeStamp = (Long) object.get("TIME_STAMP");
+        this.signature = (String) object.get("SIGNATURE");
     }
 }
