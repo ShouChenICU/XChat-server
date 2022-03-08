@@ -165,7 +165,7 @@ public class IdentitySyncTask extends AbstractTask {
                 client.getUserInfo().setAttributeMap(identity.getAttributes());
                 client.getUserInfo().setTimeStamp(identity.getTimeStamp());
                 client.getUserInfo().setSignature(identity.getSignature());
-                DaoManager.getUserInfoDao().updateUserInfo(client.getUserInfo());
+                DaoManager.getUserDao().updateUserInfo(client.getUserInfo());
             } else {
                 progressCallBack.terminate("身份验证失败，拒绝同步！");
             }

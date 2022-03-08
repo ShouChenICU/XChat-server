@@ -1,6 +1,5 @@
 package icu.xchat.server.utils;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +42,7 @@ public class CacheManager<K, V> {
      * 清理过时的Cache
      */
     public void clearCache() {
-        for (Map.Entry<K, Cache> entry : cacheMap.entrySet()) {
-            if (entry.getValue().isExpire()) {
-                cacheMap.remove(entry.getKey());
-            }
-        }
+        cacheMap.entrySet().removeIf(entry -> entry.getValue().isExpire());
     }
 
     /**

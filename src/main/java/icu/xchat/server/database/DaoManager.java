@@ -1,7 +1,7 @@
 package icu.xchat.server.database;
 
-import icu.xchat.server.database.interfaces.UserInfoDao;
-import icu.xchat.server.database.realizations.UserInfoDaoImpl;
+import icu.xchat.server.database.interfaces.UserDao;
+import icu.xchat.server.database.realizations.UserDaoImpl;
 
 /**
  * 数据访问对象管理器
@@ -9,13 +9,13 @@ import icu.xchat.server.database.realizations.UserInfoDaoImpl;
  * @author shouchen
  */
 public final class DaoManager {
-    private static UserInfoDao userInfoDao;
+    private static UserDao userDao;
 
     public static synchronized void init(){
-        userInfoDao=new UserInfoDaoImpl();
+        userDao =new UserDaoImpl();
     }
 
-    public static UserInfoDao getUserInfoDao() {
-        return userInfoDao;
+    public static UserDao getUserDao() {
+        return userDao;
     }
 }

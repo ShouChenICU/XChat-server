@@ -7,7 +7,7 @@ import icu.xchat.server.entities.UserInfo;
  *
  * @author shouchen
  */
-public interface UserInfoDao {
+public interface UserDao {
     /**
      * 根据用户标识码获取一个用户信息
      *

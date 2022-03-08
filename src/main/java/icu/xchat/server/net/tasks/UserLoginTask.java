@@ -78,7 +78,7 @@ public class UserLoginTask extends AbstractTask {
                 break;
             case 2:
                 PublicKey publicKey = EncryptUtils.getPublicKey("RSA", data);
-                userInfo = DaoManager.getUserInfoDao().getUserInfoByUidCode(IdentityUtils.getUidCodeByPublicKeyCode(publicKey.getEncoded()));
+                userInfo = DaoManager.getUserDao().getUserInfoByUidCode(IdentityUtils.getUidCodeByPublicKeyCode(publicKey.getEncoded()));
                 if (userInfo == null) {
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)

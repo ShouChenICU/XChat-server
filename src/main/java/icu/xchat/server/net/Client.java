@@ -137,7 +137,11 @@ public class Client extends NetNode {
         try {
             super.doRead();
         } catch (Exception e) {
+            if ("logout".equalsIgnoreCase(e.getMessage())) {
+                return;
+            }
             DispatchCenter.getInstance().closeClient(this);
+            LOGGER.warn("", e);
         }
     }
 }
