@@ -1,12 +1,12 @@
 package icu.xchat.server.net.tasks;
 
+import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
 import icu.xchat.server.utils.IdentityUtils;
-import icu.xchat.server.constants.TaskTypes;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
@@ -171,7 +171,6 @@ public class IdentitySyncTask extends AbstractTask {
             }
         }
         super.done();
-        client.removeTask(this.taskId);
     }
 
     /**

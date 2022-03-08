@@ -9,7 +9,10 @@ import icu.xchat.server.exceptions.LoginException;
 import icu.xchat.server.net.Client;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
-import icu.xchat.server.utils.*;
+import icu.xchat.server.utils.BsonUtils;
+import icu.xchat.server.utils.EncryptUtils;
+import icu.xchat.server.utils.IdentityUtils;
+import icu.xchat.server.utils.SecurityKeyPairTool;
 import org.bson.BSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,8 +142,7 @@ public class UserLoginTask extends AbstractTask {
     @Override
     public void done() {
         super.done();
-        LOGGER.info("用户 {} 登陆成功\n", userInfo.getUidCode());
-        client.removeTask(this.taskId);
+        LOGGER.info("用户 {} 登陆成功", userInfo.getUidCode());
     }
 
     private byte[] genAuthCode() {

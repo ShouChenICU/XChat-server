@@ -61,8 +61,14 @@ public class Client extends NetNode {
                     case TaskTypes.LOGIN:
                         task = new UserLoginTask(this);
                         break;
+                    case TaskTypes.TRANSMIT:
+                        task = new ReceiveTask();
+                        break;
                     case TaskTypes.IDENTITY_SYNC:
                         task = new IdentitySyncTask();
+                        break;
+                    case TaskTypes.ROOM_SYNC:
+                        task = new RoomSyncTask();
                         break;
                     default:
                         throw new TaskException("未知任务类型");

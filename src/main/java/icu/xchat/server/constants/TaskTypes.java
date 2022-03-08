@@ -23,9 +23,9 @@ public class TaskTypes {
      */
     public static final int LOGOUT = 2;
     /**
-     * 消息
+     * 传输任务
      */
-    public static final int MSG = 3;
+    public static final int TRANSMIT = 3;
     /**
      * 资源
      */
