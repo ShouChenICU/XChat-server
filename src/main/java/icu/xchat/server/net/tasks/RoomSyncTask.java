@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 房间信息同步任务
@@ -23,9 +25,11 @@ import java.util.Arrays;
  */
 public class RoomSyncTask extends AbstractTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomSyncTask.class);
+    private List<Integer> ridList;
 
     public RoomSyncTask() {
         super();
+        this.ridList = new ArrayList<>();
     }
 
     /**
@@ -37,13 +41,19 @@ public class RoomSyncTask extends AbstractTask {
     public void handlePacket(PacketBody packetBody) throws Exception {
         if (packetBody.getId() == 0) {
             BSONObject object = new BasicBSONObject();
-            object.put("RID_LIST", DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode()));
+            ridList = DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode());
+            object.put("RID_LIST", ridList);
             WorkerThreadPool.execute(() -> client.postPacket(packetBody.setData(BsonUtils.encode(object))));
         } else if (packetBody.getId() == 1) {
             WorkerThreadPool.execute(() -> {
                 BSONObject object;
                 object = BsonUtils.decode(packetBody.getData());
-                ChatRoomInfo roomInfo = DaoManager.getRoomDao().getRoomInfoByRid((Integer) object.get("RID"));
+                int rid = (Integer) object.get("RID");
+                // 防止客户端尝试获取未加入的房间信息
+                if (!ridList.contains(rid)) {
+                    this.terminate("用户不属于该房间！");
+                }
+                ChatRoomInfo roomInfo = DaoManager.getRoomDao().getRoomInfoByRid(rid);
                 if (roomInfo != null) {
                     byte[] digest = null;
                     try {

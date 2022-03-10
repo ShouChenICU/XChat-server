@@ -1,8 +1,5 @@
 package icu.xchat.server.entities;
 
-import icu.xchat.server.constants.MemberPermissions;
-import icu.xchat.server.constants.MemberRoles;
-import icu.xchat.server.constants.RoomAttributes;
 import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;

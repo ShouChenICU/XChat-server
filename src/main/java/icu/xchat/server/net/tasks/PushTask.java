@@ -1,5 +1,6 @@
 package icu.xchat.server.net.tasks;
 
+import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.entities.Serialization;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
@@ -34,7 +35,7 @@ public class PushTask extends AbstractTransmitTask {
             done();
             return;
         }
-        int len = Math.max(64000, dataContent.length - processedLength);
+        int len = Math.min(64000, dataContent.length - processedLength);
         byte[] buf = new byte[len];
         System.arraycopy(dataContent, processedLength, buf, 0, buf.length);
         processedLength += len;
@@ -56,6 +57,7 @@ public class PushTask extends AbstractTransmitTask {
         object.put("DATA_TYPE", this.dataType);
         object.put("DATA_SIZE", this.dataContent.length);
         return new PacketBody()
+                .setTaskType(TaskTypes.TRANSMIT)
                 .setId(0)
                 .setData(BsonUtils.encode(object));
     }

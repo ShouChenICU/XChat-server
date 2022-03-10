@@ -103,13 +103,7 @@ public class Client extends NetNode {
         }
         task.setTaskId(id);
         packetBody.setTaskId(id);
-        WorkerThreadPool.execute(() -> {
-            try {
-                postPacket(packetBody);
-            } catch (Exception e) {
-                DispatchCenter.getInstance().closeClient(this);
-            }
-        });
+        WorkerThreadPool.execute(() -> postPacket(packetBody));
     }
 
     /**
