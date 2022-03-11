@@ -52,6 +52,7 @@ public class RoomSyncTask extends AbstractTask {
                 // 防止客户端尝试获取未加入的房间信息
                 if (!ridList.contains(rid)) {
                     this.terminate("用户不属于该房间！");
+                    return;
                 }
                 ChatRoomInfo roomInfo = DaoManager.getRoomDao().getRoomInfoByRid(rid);
                 if (roomInfo != null) {
@@ -77,6 +78,9 @@ public class RoomSyncTask extends AbstractTask {
                         }
                     }
                 }
+                client.postPacket(new PacketBody()
+                        .setTaskId(this.taskId)
+                        .setId(1));
             });
         } else {
             done();

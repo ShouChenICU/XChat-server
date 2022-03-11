@@ -1,5 +1,6 @@
 package icu.xchat.server.net.tasks;
 
+import icu.xchat.server.constants.KeyPairAlgorithms;
 import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.Identity;
@@ -49,7 +50,7 @@ public class IdentitySyncTask extends AbstractTask {
             if (!Objects.equals(client.getUserInfo().getUidCode(), IdentityUtils.getUidCodeByPublicKeyCode(pubKey))) {
                 throw new Exception("身份不匹配！");
             }
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance(KeyPairAlgorithms.RSA);
             this.publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(pubKey));
             long timeStamp = (Long) object.get("TIMESTAMP");
             /*
@@ -162,9 +163,10 @@ public class IdentitySyncTask extends AbstractTask {
                     .setSignature((String) object.get("SIGNATURE"))
                     .setPublicKey(publicKey);
             if (identity.checkSignature()) {
-                client.getUserInfo().setAttributeMap(identity.getAttributes());
-                client.getUserInfo().setTimeStamp(identity.getTimeStamp());
-                client.getUserInfo().setSignature(identity.getSignature());
+                client.getUserInfo().setAttributeMap(identity.getAttributes())
+                        .setTimeStamp(identity.getTimeStamp())
+                        .setSignature(identity.getSignature())
+                        .setPublicKey(this.publicKey);
                 DaoManager.getUserDao().updateUserInfo(client.getUserInfo());
             } else {
                 progressCallBack.terminate("身份验证失败，拒绝同步！");

@@ -1,5 +1,6 @@
 package icu.xchat.server.database.realizations;
 
+import icu.xchat.server.constants.KeyPairAlgorithms;
 import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.database.interfaces.UserDao;
 import icu.xchat.server.entities.UserInfo;
@@ -7,11 +8,17 @@ import icu.xchat.server.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +45,7 @@ public class UserDaoImpl implements UserDao {
         }
         try (Connection connection = DataBaseManager.getConnection()) {
             connection.setAutoCommit(false);
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT u.uid,u.uid_code,u.status,u.signature,u.time_stamp FROM t_users AS u WHERE u.uid_code = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT u.uid,u.uid_code,u.status,u.public_key,u.signature,u.time_stamp FROM t_users AS u WHERE u.uid_code = ?");
             preparedStatement.setString(1, uidCode);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -48,6 +55,13 @@ public class UserDaoImpl implements UserDao {
                         .setStatus(resultSet.getInt("status"))
                         .setSignature(resultSet.getString("signature"))
                         .setTimeStamp(resultSet.getLong("time_stamp"));
+                try {
+                    PublicKey publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(resultSet.getString("public_key"))));
+                    userInfo.setPublicKey(publicKey);
+                } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                    LOGGER.warn("用户公钥异常");
+                    userInfo.setPublicKey(null);
+                }
                 preparedStatement = connection.prepareStatement("SELECT a.\"key\",a.value FROM t_user_attributes AS a WHERE a.uid = ?");
                 preparedStatement.setInt(1, userInfo.getUid());
                 resultSet = preparedStatement.executeQuery();
@@ -78,11 +92,12 @@ public class UserDaoImpl implements UserDao {
             connection.setAutoCommit(false);
             try {
                 // 更新用户信息
-                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE t_users SET status = ?,signature = ?,time_stamp = ? WHERE uid_code = ?");
+                PreparedStatement preparedStatement = connection.prepareStatement("UPDATE t_users SET status = ?,public_key = ?,signature = ?,time_stamp = ? WHERE uid_code = ?");
                 preparedStatement.setInt(1, userInfo.getStatus());
-                preparedStatement.setString(2, userInfo.getSignature());
-                preparedStatement.setLong(3, userInfo.getTimeStamp());
-                preparedStatement.setString(4, userInfo.getUidCode());
+                preparedStatement.setString(2, Base64.getEncoder().encodeToString(userInfo.getPublicKey().getEncoded()));
+                preparedStatement.setString(3, userInfo.getSignature());
+                preparedStatement.setLong(4, userInfo.getTimeStamp());
+                preparedStatement.setString(5, userInfo.getUidCode());
                 preparedStatement.executeUpdate();
                 // 获取用户属性集的key列表
                 preparedStatement = connection.prepareStatement("SELECT \"key\" FROM t_user_attributes WHERE uid = ?");

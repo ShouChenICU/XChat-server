@@ -31,12 +31,7 @@ public final class ServerConnectCodeUtils {
         object.put("AKE_ALGORITHM", configuration.getKeypairAlgorithm());
         object.put("HOST", configuration.getServerHost());
         object.put("PORT", configuration.getServerPort());
-        System.out.println(object);
         byte[] data = new BasicBSONEncoder().encode(object);
         return Base64.getEncoder().encodeToString(CompressionUtils.compress(data));
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(genServerCode());
     }
 }

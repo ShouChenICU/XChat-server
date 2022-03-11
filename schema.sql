@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 08/03/2022 16:55:38
+ Date: 11/03/2022 20:25:47
 */
 
 PRAGMA foreign_keys = false;
@@ -88,14 +88,13 @@ CREATE TABLE "t_mails" (
 DROP TABLE IF EXISTS "t_messages";
 CREATE TABLE "t_messages" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "sender_id" integer NOT NULL,
   "room_id" integer NOT NULL,
-  "type" text NOT NULL,
+  "sender" text NOT NULL,
+  "type" integer NOT NULL,
   "content" text NOT NULL,
-  "sign" text NOT NULL,
-  "delete_mark" integer NOT NULL DEFAULT 0,
+  "signature" text NOT NULL,
+  "is_delete" integer NOT NULL DEFAULT 0,
   "time_stamp" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "sender_id" FOREIGN KEY ("sender_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("rid") ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
@@ -117,7 +116,7 @@ CREATE TABLE "t_room_attributes" (
 DROP TABLE IF EXISTS "t_rooms";
 CREATE TABLE "t_rooms" (
   "rid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "delete_mark" integer NOT NULL DEFAULT 0,
+  "status" integer NOT NULL DEFAULT 0,
   "creation_time" integer NOT NULL DEFAULT 0
 );
 
@@ -151,6 +150,7 @@ CREATE TABLE "t_users" (
   "uid" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "uid_code" text NOT NULL,
   "status" integer NOT NULL DEFAULT 0,
+  "public_key" text NOT NULL DEFAULT '',
   "signature" text NOT NULL DEFAULT '',
   "time_stamp" integer NOT NULL DEFAULT 0
 );
