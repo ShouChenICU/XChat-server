@@ -4,6 +4,8 @@ import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
+import java.util.Objects;
+
 /**
  * 消息实体
  *
@@ -110,6 +112,7 @@ public class MessageInfo implements Serialization {
     @Override
     public byte[] serialize() {
         BSONObject object = new BasicBSONObject();
+        object.put("ID", id);
         object.put("RID", rid);
         object.put("SENDER", sender);
         object.put("TYPE", type);
@@ -127,12 +130,30 @@ public class MessageInfo implements Serialization {
     @Override
     public void deserialize(byte[] data) {
         BSONObject object = BsonUtils.decode(data);
+        this.id = (Integer) object.get("ID");
         this.rid = (Integer) object.get("RID");
         this.sender = (String) object.get("SENDER");
         this.type = (Integer) object.get("TYPE");
         this.content = (String) object.get("CONTENT");
         this.signature = (String) object.get("SIGNATURE");
         this.timeStamp = (Long) object.get("TIMESTAMP");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MessageInfo that = (MessageInfo) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 
     @Override
