@@ -25,4 +25,11 @@ public interface RoomDao {
      * @return 房间id列表
      */
     List<Integer> getRoomIdListByUidCode(String uidCode);
+
+    /**
+     * 获取所有房间id
+     *
+     * @return 房间id列表
+     */
+    List<Integer> getRoomIdList();
 }

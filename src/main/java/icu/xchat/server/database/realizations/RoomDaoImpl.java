@@ -94,4 +94,24 @@ public class RoomDaoImpl implements RoomDao {
         }
         return ridList;
     }
+
+    /**
+     * 获取所有房间id
+     *
+     * @return 房间id列表
+     */
+    @Override
+    public List<Integer> getRoomIdList() {
+        List<Integer> ridList = new ArrayList<>();
+        try (Connection connection = DataBaseManager.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT rid FROM t_rooms");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                ridList.add(resultSet.getInt("rid"));
+            }
+        } catch (SQLException e) {
+            LOGGER.error("", e);
+        }
+        return ridList;
+    }
 }

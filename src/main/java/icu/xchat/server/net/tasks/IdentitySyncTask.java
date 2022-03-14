@@ -40,10 +40,6 @@ public class IdentitySyncTask extends AbstractTask {
      */
     @Override
     public void handlePacket(PacketBody packetBody) throws Exception {
-        if (Objects.equals(packetBody.getTaskType(), TaskTypes.ERROR)) {
-            terminate(new String(packetBody.getData(), StandardCharsets.UTF_8));
-            return;
-        }
         if (packetBody.getId() == 0) {
             BSONObject object = BsonUtils.decode(packetBody.getData());
             byte[] pubKey = (byte[]) object.get("PUBLIC_KEY");

@@ -1,5 +1,6 @@
 package icu.xchat.server.net;
 
+import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.MessageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +57,20 @@ public class DispatchCenter {
         roomMap = new ConcurrentHashMap<>();
     }
 
+    public void initChatRoom() {
+        List<Integer> ridList = DaoManager.getRoomDao().getRoomIdList();
+        for (int rid : ridList) {
+            this.roomMap.put(rid, new ChatRoom(DaoManager.getRoomDao().getRoomInfoByRid(rid)));
+        }
+    }
+
     /**
      * 广播消息
      *
      * @param messageInfo 消息信息
-     * @param rid         房间id
      */
-    public void broadcastMessage(MessageInfo messageInfo, int rid) {
-
+    public void broadcastMessage(MessageInfo messageInfo) {
+        roomMap.get(messageInfo.getRid()).broadcastMessage(messageInfo);
     }
 
     /**
@@ -82,6 +89,7 @@ public class DispatchCenter {
                 kick(client, "登陆超时");
                 closeClient(client);
             } else {
+                client.setRidList(DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode()));
                 loginClientMap.put(client.getUserInfo().getUidCode(), client);
             }
         }, 5, TimeUnit.SECONDS);
@@ -116,8 +124,8 @@ public class DispatchCenter {
         }
         if (client.isLogin()) {
             loginClientMap.remove(client.getUserInfo().getUidCode());
-            for (ChatRoom room : roomMap.values()) {
-                room.removeClient(client.getUserInfo().getUidCode());
+            for (int rid : client.getRidList()) {
+                roomMap.get(rid).removeClient(client.getUserInfo().getUidCode());
             }
         }
         try {

@@ -62,6 +62,7 @@ public class UserDaoImpl implements UserDao {
                     LOGGER.warn("用户公钥异常");
                     userInfo.setPublicKey(null);
                 }
+                // 查询用户属性集
                 preparedStatement = connection.prepareStatement("SELECT a.\"key\",a.value FROM t_user_attributes AS a WHERE a.uid = ?");
                 preparedStatement.setInt(1, userInfo.getUid());
                 resultSet = preparedStatement.executeQuery();
@@ -107,6 +108,7 @@ public class UserDaoImpl implements UserDao {
                 while (resultSet.next()) {
                     keys.add(resultSet.getString("key"));
                 }
+                // 初始化更新和插入属性
                 preparedStatement = connection.prepareStatement("UPDATE t_user_attributes SET value = ?");
                 PreparedStatement preparedStatement1 = connection.prepareStatement("INSERT INTO t_user_attributes (uid,\"key\",value) VALUES(?,?,?)");
                 preparedStatement1.setInt(1, userInfo.getUid());

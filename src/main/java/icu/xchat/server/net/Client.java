@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +24,7 @@ public class Client extends NetNode {
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
     private final ConcurrentHashMap<Integer, Task> taskMap;
     private UserInfo userInfo;
+    private List<Integer> ridList;
     private int taskId;
 
 
@@ -77,7 +81,11 @@ public class Client extends NetNode {
                 ((AbstractTask) task).setClient(this);
                 taskMap.put(packetBody.getTaskId(), task);
             }
-            task.handlePacket(packetBody);
+            if (!Objects.equals(packetBody.getTaskType(), TaskTypes.ERROR)) {
+                task.handlePacket(packetBody);
+            } else {
+                task.terminate(new String(packetBody.getData(), StandardCharsets.UTF_8));
+            }
         } else {
             if (Objects.equals(packetBody.getTaskType(), TaskTypes.LOGOUT)) {
                 throw new Exception("logout");
@@ -104,6 +112,15 @@ public class Client extends NetNode {
         task.setTaskId(id);
         packetBody.setTaskId(id);
         WorkerThreadPool.execute(() -> postPacket(packetBody));
+    }
+
+    public Client setRidList(List<Integer> ridList) {
+        this.ridList = ridList;
+        return this;
+    }
+
+    public List<Integer> getRidList() {
+        return Collections.unmodifiableList(ridList);
     }
 
     /**

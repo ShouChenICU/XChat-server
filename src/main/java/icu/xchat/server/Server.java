@@ -2,6 +2,7 @@ package icu.xchat.server;
 
 import icu.xchat.server.configurations.ServerConfiguration;
 import icu.xchat.server.database.DataBaseManager;
+import icu.xchat.server.net.DispatchCenter;
 import icu.xchat.server.net.NetCore;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.SecurityKeyPairTool;
@@ -23,16 +24,19 @@ public final class Server {
     private static void initServer() throws Exception {
         LOGGER.info("初始化配置...");
         configuration = ServerConfiguration.load();
-        LOGGER.info("加载服务端密钥对...");
+//        LOGGER.info("加载服务端密钥对...");
         SecurityKeyPairTool.loadKeyPair(configuration.getKeypairAlgorithm());
         LOGGER.info("密钥对加载完毕");
-        LOGGER.info("初始化数据库...");
+//        LOGGER.info("初始化数据库...");
         DataBaseManager.initDataBase(configuration.getDbType(), configuration.getDbUsername(), configuration.getDbPassword(), configuration.getDbUrl());
         LOGGER.info("数据库初始化完毕");
-        LOGGER.info("初始化任务线程池...");
+//        LOGGER.info("初始化任务线程池...");
         WorkerThreadPool.init(configuration.getThreadPoolSize());
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
-        LOGGER.info("初始化网络...");
+//        LOGGER.info("加载聊天室...");
+        DispatchCenter.getInstance().initChatRoom();
+        LOGGER.info("聊天室加载完毕");
+//        LOGGER.info("初始化网络...");
         NetCore.bindPort(configuration.getServerPort());
         LOGGER.info("网络初始化完毕");
         Runtime.getRuntime().addShutdownHook(new Thread(Server::stop));

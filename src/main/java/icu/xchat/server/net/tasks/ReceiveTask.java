@@ -1,12 +1,16 @@
 package icu.xchat.server.net.tasks;
 
 
+import icu.xchat.server.constants.TaskTypes;
+import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.MessageInfo;
+import icu.xchat.server.net.DispatchCenter;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -47,8 +51,35 @@ public class ReceiveTask extends AbstractTransmitTask {
             if (Objects.equals(dataType, TYPE_MSG_INFO)) {
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.deserialize(dataContent);
-
-                // TODO: 2022/3/14
+                // 验证身份是否一致
+                if (!Objects.equals(messageInfo.getSender(), client.getUserInfo().getUidCode())) {
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData("发送者身份异常！".getBytes(StandardCharsets.UTF_8)));
+                    super.done();
+                    return;
+                } else if (!client.getRidList().contains(messageInfo.getRid())) {
+                    // 验证用户是否在该房间
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData("发送者不属于该房间！".getBytes(StandardCharsets.UTF_8)));
+                    super.done();
+                    return;
+                }
+                // 设置时间戳
+                messageInfo.setTimeStamp(System.currentTimeMillis());
+                // 写入数据库
+                if (!DaoManager.getMessageDao().insertMessage(messageInfo)) {
+                    client.postPacket(new PacketBody()
+                            .setTaskId(this.taskId)
+                            .setTaskType(TaskTypes.ERROR)
+                            .setData("发生了不该发生的错误！".getBytes(StandardCharsets.UTF_8)));
+                    super.done();
+                }
+                // 广播消息
+                DispatchCenter.getInstance().broadcastMessage(messageInfo);
             }
             client.postPacket(new PacketBody()
                     .setTaskId(this.taskId)

@@ -23,6 +23,10 @@ public class ChatRoom {
         this.roomInfo = roomInfo;
     }
 
+    public int getRid() {
+        return roomInfo.getRid();
+    }
+
     public ChatRoom updateRoomInfo(ChatRoomInfo roomInfo) {
         this.roomInfo = roomInfo;
         return this;
