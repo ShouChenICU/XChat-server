@@ -1,6 +1,6 @@
 package icu.xchat.server.net;
 
-import icu.xchat.server.entities.ChatRoomInfo;
+import icu.xchat.server.entities.MessageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class DispatchCenter {
     private static volatile DispatchCenter dispatchCenter;
     private final List<Client> onlineClientList;
     private final ConcurrentHashMap<String, Client> loginClientMap;
-    private final ConcurrentHashMap<Integer, ChatRoomInfo> chatRoomMap;
+    private final ConcurrentHashMap<Integer, ChatRoom> roomMap;
 
     static {
         timerExecutor = new ScheduledThreadPoolExecutor(1, runnable -> {
@@ -53,7 +53,17 @@ public class DispatchCenter {
     private DispatchCenter() {
         onlineClientList = new ArrayList<>();
         loginClientMap = new ConcurrentHashMap<>();
-        chatRoomMap = new ConcurrentHashMap<>();
+        roomMap = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * 广播消息
+     *
+     * @param messageInfo 消息信息
+     * @param rid         房间id
+     */
+    public void broadcastMessage(MessageInfo messageInfo, int rid) {
+
     }
 
     /**
@@ -71,6 +81,8 @@ public class DispatchCenter {
             if (!client.isLogin()) {
                 kick(client, "登陆超时");
                 closeClient(client);
+            } else {
+                loginClientMap.put(client.getUserInfo().getUidCode(), client);
             }
         }, 5, TimeUnit.SECONDS);
     }
@@ -101,8 +113,11 @@ public class DispatchCenter {
         }
         synchronized (onlineClientList) {
             onlineClientList.remove(client);
-            if (client.isLogin()) {
-                loginClientMap.remove(client.getUserInfo().getUidCode());
+        }
+        if (client.isLogin()) {
+            loginClientMap.remove(client.getUserInfo().getUidCode());
+            for (ChatRoom room : roomMap.values()) {
+                room.removeClient(client.getUserInfo().getUidCode());
             }
         }
         try {

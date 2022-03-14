@@ -28,21 +28,18 @@ public class PushTask extends AbstractTransmitTask {
      */
     @Override
     public void handlePacket(PacketBody packetBody) throws Exception {
-        if (processedLength == dataContent.length) {
+        if (packetBody.getId() == 1) {
+            int len = Math.min(64000, dataContent.length - processedLength);
+            byte[] buf = new byte[len];
+            System.arraycopy(dataContent, processedLength, buf, 0, buf.length);
+            processedLength += len;
             WorkerThreadPool.execute(() -> client.postPacket(new PacketBody()
                     .setTaskId(this.taskId)
-                    .setId(2)));
+                    .setId(1)
+                    .setData(buf)));
+        } else {
             done();
-            return;
         }
-        int len = Math.min(64000, dataContent.length - processedLength);
-        byte[] buf = new byte[len];
-        System.arraycopy(dataContent, processedLength, buf, 0, buf.length);
-        processedLength += len;
-        WorkerThreadPool.execute(() -> client.postPacket(new PacketBody()
-                .setTaskId(this.taskId)
-                .setId(1)
-                .setData(buf)));
     }
 
     /**

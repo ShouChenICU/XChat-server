@@ -9,23 +9,23 @@ public abstract class AbstractTransmitTask extends AbstractTask {
     /**
      * 创建动作
      */
-    protected static final Integer ACTION_CREATE = 1;
+    public static final Integer ACTION_CREATE = 1;
     /**
      * 更新动作
      */
-    protected static final Integer ACTION_UPDATE = 2;
+    public static final Integer ACTION_UPDATE = 2;
     /**
      * 传输内容是房间信息
      */
-    protected static final Integer TYPE_ROOM_INFO = 11;
+    public static final Integer TYPE_ROOM_INFO = 11;
     /**
      * 传输内容是用户信息
      */
-    protected static final Integer TYPE_USER_INFO = 12;
+    public static final Integer TYPE_USER_INFO = 12;
     /**
      * 传输内容是消息
      */
-    protected static final Integer TYPE_MSG_INFO = 13;
+    public static final Integer TYPE_MSG_INFO = 13;
     /**
      * 动作类型
      */
