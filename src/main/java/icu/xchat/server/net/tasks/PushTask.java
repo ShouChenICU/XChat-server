@@ -21,6 +21,13 @@ public class PushTask extends AbstractTransmitTask {
         this.dataContent = obj.serialize();
     }
 
+    public PushTask(Serialization obj, int dataType, int actionType, ProgressCallBack callBack) {
+        super(callBack);
+        this.actionType = actionType;
+        this.dataType = dataType;
+        this.dataContent = obj.serialize();
+    }
+
     /**
      * 处理一个包
      *

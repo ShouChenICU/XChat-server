@@ -46,4 +46,8 @@ public abstract class AbstractTransmitTask extends AbstractTask {
     public AbstractTransmitTask() {
         this.processedLength = 0;
     }
+
+    public AbstractTransmitTask(ProgressCallBack callBack) {
+        super(callBack);
+    }
 }

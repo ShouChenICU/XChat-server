@@ -42,4 +42,8 @@ public class TaskTypes {
      * 房间信息同步
      */
     public static final int ROOM_SYNC = 7;
+    /**
+     * 用户信息同步
+     */
+    public static final int USER_SYNC = 8;
 }

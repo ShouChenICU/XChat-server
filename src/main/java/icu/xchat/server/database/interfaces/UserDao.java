@@ -2,6 +2,8 @@ package icu.xchat.server.database.interfaces;
 
 import icu.xchat.server.entities.UserInfo;
 
+import java.util.List;
+
 /**
  * 用户信息数据访问对象
  *
@@ -23,4 +25,12 @@ public interface UserDao {
      * @return 结果
      */
     boolean updateUserInfo(UserInfo userInfo);
+
+    /**
+     * 获取和某用户相关的所有用户识别码
+     *
+     * @param uidCode 指定用户的识别码
+     * @return 用户识别码列表
+     */
+    List<String> getUidCodeListAboutUser(String uidCode);
 }

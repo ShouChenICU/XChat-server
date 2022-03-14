@@ -41,4 +41,9 @@ public interface Task {
      * 终止任务
      */
     void terminate(String errMsg);
+
+    /**
+     * 完成任务
+     */
+    void done();
 }

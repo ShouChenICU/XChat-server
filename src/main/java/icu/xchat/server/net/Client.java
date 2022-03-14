@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public class Client extends NetNode {
         super(channel);
         this.taskMap = new ConcurrentHashMap<>();
         this.userInfo = null;
+        this.ridList = new ArrayList<>();
         this.taskId = -1;
     }
 
@@ -73,6 +75,9 @@ public class Client extends NetNode {
                         break;
                     case TaskTypes.ROOM_SYNC:
                         task = new RoomSyncTask();
+                        break;
+                    case TaskTypes.USER_SYNC:
+                        task = new UserSyncTask();
                         break;
                     default:
                         throw new TaskException("未知任务类型");

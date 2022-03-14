@@ -154,7 +154,9 @@ public class UserInfo implements Serialization {
         BSONObject object = new BasicBSONObject();
         object.put("UID_CODE", uidCode);
         object.put("ATTRIBUTES", attributeMap);
-        object.put("PUB_KEY", publicKey.getEncoded());
+        if (publicKey != null) {
+            object.put("PUB_KEY", publicKey.getEncoded());
+        }
         object.put("TIME_STAMP", timeStamp);
         object.put("SIGNATURE", signature);
         return BsonUtils.encode(object);
@@ -171,10 +173,15 @@ public class UserInfo implements Serialization {
         BSONObject object = BsonUtils.decode(data);
         this.uidCode = (String) object.get("UID_CODE");
         this.attributeMap = (Map<String, String>) object.get("ATTRIBUTES");
-        try {
-            this.publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec((byte[]) object.get("PUB_KEY")));
-        } catch (Exception e) {
-            LOGGER.warn("", e);
+        byte[] pubKey = (byte[]) object.get("PUB_KEY");
+        if (pubKey != null) {
+            try {
+                this.publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec((byte[]) object.get("PUB_KEY")));
+            } catch (Exception e) {
+                LOGGER.warn("", e);
+            }
+        } else {
+            this.publicKey = null;
         }
         this.timeStamp = (Long) object.get("TIME_STAMP");
         this.signature = (String) object.get("SIGNATURE");

@@ -84,8 +84,8 @@ public class ReceiveTask extends AbstractTransmitTask {
             client.postPacket(new PacketBody()
                     .setTaskId(this.taskId)
                     .setId(2));
+            super.done();
         });
-        super.done();
     }
 
     /**

@@ -55,11 +55,16 @@ public class UserDaoImpl implements UserDao {
                         .setStatus(resultSet.getInt("status"))
                         .setSignature(resultSet.getString("signature"))
                         .setTimeStamp(resultSet.getLong("time_stamp"));
-                try {
-                    PublicKey publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(resultSet.getString("public_key"))));
-                    userInfo.setPublicKey(publicKey);
-                } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-                    LOGGER.warn("用户公钥异常");
+                String publicKeyStr = resultSet.getString("public_key");
+                if (publicKeyStr != null && !publicKeyStr.isEmpty()) {
+                    try {
+                        PublicKey publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyStr)));
+                        userInfo.setPublicKey(publicKey);
+                    } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                        LOGGER.warn("用户公钥异常");
+                        userInfo.setPublicKey(null);
+                    }
+                } else {
                     userInfo.setPublicKey(null);
                 }
                 // 查询用户属性集
@@ -95,7 +100,11 @@ public class UserDaoImpl implements UserDao {
                 // 更新用户信息
                 PreparedStatement preparedStatement = connection.prepareStatement("UPDATE t_users SET status = ?,public_key = ?,signature = ?,time_stamp = ? WHERE uid_code = ?");
                 preparedStatement.setInt(1, userInfo.getStatus());
-                preparedStatement.setString(2, Base64.getEncoder().encodeToString(userInfo.getPublicKey().getEncoded()));
+                if (userInfo.getPublicKey() != null) {
+                    preparedStatement.setString(2, Base64.getEncoder().encodeToString(userInfo.getPublicKey().getEncoded()));
+                } else {
+                    preparedStatement.setString(2, "");
+                }
                 preparedStatement.setString(3, userInfo.getSignature());
                 preparedStatement.setLong(4, userInfo.getTimeStamp());
                 preparedStatement.setString(5, userInfo.getUidCode());
@@ -146,5 +155,29 @@ public class UserDaoImpl implements UserDao {
         }
         USER_INFO_CACHES.removeCache(userInfo.getUidCode());
         return true;
+    }
+
+    /**
+     * 获取和某用户相关的所有用户识别码
+     *
+     * @param uidCode 指定用户的识别码
+     * @return 用户识别码列表
+     */
+    @Override
+    public List<String> getUidCodeListAboutUser(String uidCode) {
+        List<String> uidCodeList = null;
+        try (Connection connection = DataBaseManager.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT DISTINCT uid_code FROM r_members WHERE rid IN (SELECT rid FROM r_members WHERE uid_code = ?) AND uid_code != ?");
+            preparedStatement.setString(1, uidCode);
+            preparedStatement.setString(2, uidCode);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                uidCodeList = new ArrayList<>();
+                uidCodeList.add(resultSet.getString("uid_code"));
+            }
+        } catch (SQLException e) {
+            LOGGER.error("", e);
+        }
+        return uidCodeList;
     }
 }
