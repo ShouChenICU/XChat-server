@@ -59,7 +59,7 @@ public class UserSyncTask extends AbstractTask {
             }
             try {
                 // 等待计数器清零
-                if (latch.await(3, TimeUnit.MINUTES)) {
+                if (latch.await(30, TimeUnit.SECONDS)) {
                     // 告诉客户端同步成功
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)
@@ -70,8 +70,8 @@ public class UserSyncTask extends AbstractTask {
                     client.postPacket(new PacketBody()
                             .setTaskId(this.taskId)
                             .setTaskType(TaskTypes.ERROR)
-                            .setData("用户信息同步失败！".getBytes(StandardCharsets.UTF_8)));
-                    terminate("用户信息同步失败！");
+                            .setData("超时，用户信息同步失败！".getBytes(StandardCharsets.UTF_8)));
+                    terminate("超时，用户信息同步失败！");
                 }
             } catch (InterruptedException e) {
                 client.postPacket(new PacketBody()
