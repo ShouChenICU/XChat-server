@@ -34,7 +34,7 @@ public final class Server {
         WorkerThreadPool.init(configuration.getThreadPoolSize());
         LOGGER.info("线程池初始化完毕，线程数量：" + configuration.getThreadPoolSize());
 //        LOGGER.info("加载聊天室...");
-        DispatchCenter.getInstance().initChatRoom();
+        DispatchCenter.getInstance().loadChatRoom();
         LOGGER.info("聊天室加载完毕");
 //        LOGGER.info("初始化网络...");
         NetCore.bindPort(configuration.getServerPort());

@@ -23,11 +23,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Client extends NetNode {
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
+    /**
+     * 任务map
+     */
     private final ConcurrentHashMap<Integer, Task> taskMap;
+    /**
+     * 用户信息
+     */
     private UserInfo userInfo;
+    /**
+     * 用户加入的房间列表
+     */
     private List<Integer> ridList;
+    /**
+     * 任务id计数器
+     */
     private int taskId;
-
 
     public Client(SocketChannel channel) throws IOException {
         super(channel);

@@ -131,7 +131,6 @@ public class UserDaoImpl implements UserDao {
                         preparedStatement1.setString(2, entry.getKey());
                         preparedStatement1.setString(3, entry.getValue());
                         preparedStatement1.executeUpdate();
-
                     }
                 }
                 // 删除多余的属性
@@ -141,14 +140,14 @@ public class UserDaoImpl implements UserDao {
                     preparedStatement.setString(2, key);
                     preparedStatement.executeUpdate();
                 }
-                // 提交事务
-                connection.commit();
             } catch (Exception e) {
                 LOGGER.error("", e);
                 // 回滚事务
                 connection.rollback();
                 return false;
             }
+            // 提交事务
+            connection.commit();
         } catch (SQLException e) {
             LOGGER.error("", e);
             return false;

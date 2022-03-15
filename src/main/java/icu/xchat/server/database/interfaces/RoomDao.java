@@ -19,6 +19,14 @@ public interface RoomDao {
     ChatRoomInfo getRoomInfoByRid(int rid);
 
     /**
+     * 插入一个房间
+     *
+     * @param roomInfo 房间信息
+     * @return 结果
+     */
+    boolean insertRoomInfo(ChatRoomInfo roomInfo);
+
+    /**
      * 获取用户加入的房间id列表
      *
      * @param uidCode 用户标识码

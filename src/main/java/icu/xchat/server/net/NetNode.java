@@ -28,8 +28,8 @@ public abstract class NetNode {
 
     public NetNode(SocketChannel channel) throws ClosedChannelException {
         this.channel = channel;
-        this.readBuffer = ByteBuffer.allocateDirect(512);
-        this.writeBuffer = ByteBuffer.allocateDirect(512);
+        this.readBuffer = ByteBuffer.allocateDirect(4096);
+        this.writeBuffer = ByteBuffer.allocateDirect(4096);
         this.packageUtils = new PackageUtils();
         this.heartTime = System.currentTimeMillis();
         this.packetStatus = 0;

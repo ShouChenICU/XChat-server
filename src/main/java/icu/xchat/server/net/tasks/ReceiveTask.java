@@ -1,9 +1,15 @@
 package icu.xchat.server.net.tasks;
 
 
+import icu.xchat.server.constants.MemberPermissions;
+import icu.xchat.server.constants.MemberRoles;
 import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.database.DaoManager;
+import icu.xchat.server.entities.ChatRoomInfo;
+import icu.xchat.server.entities.MemberInfo;
 import icu.xchat.server.entities.MessageInfo;
+import icu.xchat.server.exceptions.TaskException;
+import icu.xchat.server.net.ChatRoom;
 import icu.xchat.server.net.DispatchCenter;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
@@ -11,7 +17,11 @@ import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 数据接收任务
@@ -77,9 +87,67 @@ public class ReceiveTask extends AbstractTransmitTask {
                             .setTaskType(TaskTypes.ERROR)
                             .setData("发生了不该发生的错误！".getBytes(StandardCharsets.UTF_8)));
                     super.done();
+                    return;
                 }
                 // 广播消息
                 DispatchCenter.getInstance().broadcastMessage(messageInfo);
+            } else if (Objects.equals(dataType, TYPE_ROOM_INFO)) {
+                // 新建房间
+                if (Objects.equals(actionType, ACTION_CREATE)) {
+                    ChatRoomInfo roomInfo = new ChatRoomInfo();
+                    roomInfo.deserialize(dataContent);
+                    Map<String, MemberInfo> memberInfoMap = new HashMap<>();
+                    // 设置房主
+                    memberInfoMap.put(client.getUserInfo().getUidCode(), new MemberInfo()
+                            .setUidCode(client.getUserInfo().getUidCode())
+                            .setRole(MemberRoles.ROLE_OWNER)
+                            .setPermission(MemberPermissions.ALL));
+                    roomInfo.setMemberInfoMap(memberInfoMap);
+                    // 写入数据库，自动更新主键和时间戳
+                    if (DaoManager.getRoomDao().insertRoomInfo(roomInfo)) {
+                        // 将新房间加入到调度器
+                        ChatRoom chatRoom = new ChatRoom(roomInfo);
+                        chatRoom.putClint(client);
+                        DispatchCenter.getInstance().putChatRoom(chatRoom);
+                        CountDownLatch latch = new CountDownLatch(1);
+                        try {
+                            // 推送这个新房间
+                            client.addTask(new PushTask(roomInfo,
+                                    PushTask.TYPE_ROOM_INFO,
+                                    PushTask.ACTION_CREATE,
+                                    new ProgressAdapter() {
+                                        @Override
+                                        public void completeProgress() {
+                                            latch.countDown();
+                                            super.completeProgress();
+                                        }
+                                    }));
+                            // 等待推送成功
+                            if (latch.await(30, TimeUnit.SECONDS)) {
+                                client.postPacket(new PacketBody()
+                                        .setTaskId(this.taskId)
+                                        .setTaskType(TaskTypes.ERROR)
+                                        .setData("超时！".getBytes(StandardCharsets.UTF_8)));
+                                super.done();
+                                return;
+                            }
+                        } catch (TaskException | InterruptedException e) {
+                            client.postPacket(new PacketBody()
+                                    .setTaskId(this.taskId)
+                                    .setTaskType(TaskTypes.ERROR)
+                                    .setData("这是不可能发生的错误！".getBytes(StandardCharsets.UTF_8)));
+                            super.done();
+                            return;
+                        }
+                    } else {
+                        client.postPacket(new PacketBody()
+                                .setTaskId(this.taskId)
+                                .setTaskType(TaskTypes.ERROR)
+                                .setData("发生了不该发生的错误！".getBytes(StandardCharsets.UTF_8)));
+                        super.done();
+                        return;
+                    }
+                }
             }
             client.postPacket(new PacketBody()
                     .setTaskId(this.taskId)

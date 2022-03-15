@@ -57,11 +57,18 @@ public class DispatchCenter {
         roomMap = new ConcurrentHashMap<>();
     }
 
-    public void initChatRoom() {
+    /**
+     * 加载聊天室
+     */
+    public void loadChatRoom() {
         List<Integer> ridList = DaoManager.getRoomDao().getRoomIdList();
         for (int rid : ridList) {
             this.roomMap.put(rid, new ChatRoom(DaoManager.getRoomDao().getRoomInfoByRid(rid)));
         }
+    }
+
+    public void putChatRoom(ChatRoom chatRoom) {
+        roomMap.put(chatRoom.getRid(), chatRoom);
     }
 
     /**
