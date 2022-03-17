@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 聊天室数据访问对象实现
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class RoomDaoImpl implements RoomDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomDaoImpl.class);
-    private static final CacheManager<Integer, ChatRoomInfo> ROOM_INFO_CACHES = new CacheManager<>(3 * 60 * 1000);
+    private static final CacheManager<Integer, ChatRoomInfo> ROOM_INFO_CACHES = new CacheManager<>(TimeUnit.MINUTES.toMillis(3));
 
     /**
      * 获取一个房间信息

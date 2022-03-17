@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户信息数据访问对象实现
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 public class UserDaoImpl implements UserDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
-    private static final CacheManager<String, UserInfo> USER_INFO_CACHES = new CacheManager<>(3 * 60 * 1000);
+    private static final CacheManager<String, UserInfo> USER_INFO_CACHES = new CacheManager<>(TimeUnit.MINUTES.toMillis(3));
 
     /**
      * 根据用户标识码获取一个用户信息

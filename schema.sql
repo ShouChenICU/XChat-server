@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 11/03/2022 20:25:47
+ Date: 17/03/2022 15:20:30
 */
 
 PRAGMA foreign_keys = false;
@@ -92,7 +92,7 @@ CREATE TABLE "t_messages" (
   "sender" text NOT NULL,
   "type" integer NOT NULL,
   "content" text NOT NULL,
-  "signature" text NOT NULL,
+  "signature" text NOT NULL DEFAULT '',
   "is_delete" integer NOT NULL DEFAULT 0,
   "time_stamp" integer NOT NULL DEFAULT 0,
   CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("rid") ON DELETE NO ACTION ON UPDATE CASCADE

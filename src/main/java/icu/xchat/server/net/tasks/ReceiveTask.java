@@ -94,6 +94,7 @@ public class ReceiveTask extends AbstractTransmitTask {
             } else if (Objects.equals(dataType, TYPE_ROOM_INFO)) {
                 // 新建房间
                 if (Objects.equals(actionType, ACTION_CREATE)) {
+                    // TODO: 2022/3/15 限制房间最大数量
                     ChatRoomInfo roomInfo = new ChatRoomInfo();
                     roomInfo.deserialize(dataContent);
                     Map<String, MemberInfo> memberInfoMap = new HashMap<>();

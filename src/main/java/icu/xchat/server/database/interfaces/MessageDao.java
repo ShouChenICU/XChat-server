@@ -2,6 +2,8 @@ package icu.xchat.server.database.interfaces;
 
 import icu.xchat.server.entities.MessageInfo;
 
+import java.util.List;
+
 /**
  * 消息数据访问接口
  *
@@ -23,4 +25,14 @@ public interface MessageDao {
      * @return 结果
      */
     boolean insertMessage(MessageInfo messageInfo);
+
+    /**
+     * 获取指定最新时间和数量的消息id列表
+     *
+     * @param rid   房间id
+     * @param time  时间戳
+     * @param count 数量
+     * @return 消息列表
+     */
+    List<Integer> getMessageIdListByLatestTimeAndCount(int rid, long time, int count);
 }

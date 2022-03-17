@@ -90,6 +90,9 @@ public class Client extends NetNode {
                     case TaskTypes.USER_SYNC:
                         task = new UserSyncTask();
                         break;
+                    case TaskTypes.MSG_SYNC:
+                        task = new MessageSyncTask();
+                        break;
                     default:
                         throw new TaskException("未知任务类型");
                 }

@@ -3,6 +3,7 @@ package icu.xchat.server.database.realizations;
 import icu.xchat.server.database.DataBaseManager;
 import icu.xchat.server.database.interfaces.MessageDao;
 import icu.xchat.server.entities.MessageInfo;
+import icu.xchat.server.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 消息数据访问对象实现
@@ -18,6 +22,7 @@ import java.sql.SQLException;
  */
 public class MessageDaoImpl implements MessageDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageDaoImpl.class);
+    private static final CacheManager<Integer, MessageInfo> MESSAGE_INFO_CACHES = new CacheManager<>(TimeUnit.MINUTES.toMillis(3));
 
     /**
      * 根据id获取消息
@@ -27,9 +32,12 @@ public class MessageDaoImpl implements MessageDao {
      */
     @Override
     public MessageInfo getMessageById(int id) {
-        MessageInfo messageInfo = null;
+        MessageInfo messageInfo = MESSAGE_INFO_CACHES.getCache(id);
+        if (messageInfo != null) {
+            return messageInfo;
+        }
         try (Connection connection = DataBaseManager.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id,room_id AS rid,sender,type,content,signature,time_stamp FROM t_messages WHERE m.id = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id,room_id AS rid,sender,type,content,signature,time_stamp FROM t_messages WHERE id = ?");
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -44,6 +52,10 @@ public class MessageDaoImpl implements MessageDao {
             }
         } catch (SQLException e) {
             LOGGER.error("", e);
+            messageInfo = null;
+        }
+        if (messageInfo != null) {
+            MESSAGE_INFO_CACHES.putCache(id, messageInfo);
         }
         return messageInfo;
     }
@@ -75,6 +87,32 @@ public class MessageDaoImpl implements MessageDao {
             LOGGER.error("", e);
             return false;
         }
+        MESSAGE_INFO_CACHES.putCache(messageInfo.getId(), messageInfo);
         return true;
+    }
+
+    /**
+     * 获取指定最新时间和数量的消息id列表
+     *
+     * @param time  时间戳
+     * @param count 数量
+     * @return 消息列表
+     */
+    @Override
+    public List<Integer> getMessageIdListByLatestTimeAndCount(int rid, long time, int count) {
+        List<Integer> messageIdList = new ArrayList<>();
+        try (Connection connection = DataBaseManager.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM t_messages WHERE room_id = ? AND time_stamp < ? AND is_delete = 0 ORDER BY time_stamp LIMIT ?");
+            preparedStatement.setInt(1, rid);
+            preparedStatement.setLong(2, time);
+            preparedStatement.setInt(3, count);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                messageIdList.add(resultSet.getInt("id"));
+            }
+        } catch (SQLException e) {
+            LOGGER.error("", e);
+        }
+        return messageIdList;
     }
 }

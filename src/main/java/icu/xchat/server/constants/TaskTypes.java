@@ -46,4 +46,8 @@ public class TaskTypes {
      * 用户信息同步
      */
     public static final int USER_SYNC = 8;
+    /**
+     * 消息同步
+     */
+    public static final int MSG_SYNC = 9;
 }
