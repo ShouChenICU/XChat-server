@@ -16,11 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChatRoom {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatRoom.class);
+    private final ConcurrentHashMap<String, Client> onlineClintMap;
     private ChatRoomInfo roomInfo;
-    private ConcurrentHashMap<String, Client> onlineClintMap;
 
     public ChatRoom(ChatRoomInfo roomInfo) {
         this.roomInfo = roomInfo;
+        this.onlineClintMap = new ConcurrentHashMap<>();
     }
 
     public int getRid() {
@@ -54,7 +55,7 @@ public class ChatRoom {
                     entry.getValue().addTask(new PushTask(messageInfo, PushTask.TYPE_MSG_INFO, PushTask.ACTION_CREATE));
                 } catch (Exception e) {
                     onlineClintMap.remove(entry.getKey());
-                    LOGGER.warn("", e);
+                    LOGGER.warn("消息广播异常：{}", entry.getValue().getUserInfo(), e);
                 }
             });
         }

@@ -124,7 +124,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                                         }
                                     }));
                             // 等待推送成功
-                            if (latch.await(30, TimeUnit.SECONDS)) {
+                            if (!latch.await(30, TimeUnit.SECONDS)) {
                                 client.postPacket(new PacketBody()
                                         .setTaskId(this.taskId)
                                         .setTaskType(TaskTypes.ERROR)

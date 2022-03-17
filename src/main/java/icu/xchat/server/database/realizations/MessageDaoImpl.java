@@ -7,10 +7,7 @@ import icu.xchat.server.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +66,7 @@ public class MessageDaoImpl implements MessageDao {
     @Override
     public boolean insertMessage(MessageInfo messageInfo) {
         try (Connection connection = DataBaseManager.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO t_messages (room_id,sender,type,content,signature,time_stamp) VALUES(?,?,?,?,?,?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO t_messages (room_id,sender,type,content,signature,time_stamp) VALUES(?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, messageInfo.getRid());
             preparedStatement.setString(2, messageInfo.getSender());
             preparedStatement.setInt(3, messageInfo.getType());
@@ -81,7 +78,7 @@ public class MessageDaoImpl implements MessageDao {
             }
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
-                messageInfo.setId(resultSet.getInt("id"));
+                messageInfo.setId(resultSet.getInt(1));
             }
         } catch (SQLException e) {
             LOGGER.error("", e);

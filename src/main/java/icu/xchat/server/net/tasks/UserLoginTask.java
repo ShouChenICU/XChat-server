@@ -7,6 +7,7 @@ import icu.xchat.server.entities.Identity;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.LoginException;
 import icu.xchat.server.net.Client;
+import icu.xchat.server.net.DispatchCenter;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
@@ -127,13 +128,6 @@ public class UserLoginTask extends AbstractTask {
                             .setData("用户身份验证失败".getBytes(StandardCharsets.UTF_8)));
                     throw new LoginException("用户身份验证失败");
                 }
-                /*
-                 * 验证成功，告诉客户登陆完毕
-                 */
-                finalPacket = new PacketBody()
-                        .setTaskId(this.taskId)
-                        .setId(3);
-                WorkerThreadPool.execute(() -> client.postPacket(finalPacket));
                 done();
                 break;
         }
@@ -141,8 +135,17 @@ public class UserLoginTask extends AbstractTask {
 
     @Override
     public void done() {
-        super.done();
+        client.setRidList(DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode()));
+        DispatchCenter.getInstance().putLoginClient(client);
+        /*
+         * 验证成功，告诉客户登陆完毕
+         */
+        PacketBody packetBody = new PacketBody()
+                .setTaskId(this.taskId)
+                .setId(3);
+        WorkerThreadPool.execute(() -> client.postPacket(packetBody));
         LOGGER.info("用户 {} 登陆成功", userInfo.getUidCode());
+        super.done();
     }
 
     private byte[] genAuthCode() {

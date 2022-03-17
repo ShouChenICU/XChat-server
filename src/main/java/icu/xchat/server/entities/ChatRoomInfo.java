@@ -28,7 +28,7 @@ public class ChatRoomInfo implements Serialization {
     /**
      * 创建时间
      */
-    private Long creation_time;
+    private Long creationTime;
 
     public ChatRoomInfo() {
         this.attributeMap = new HashMap<>();
@@ -85,12 +85,12 @@ public class ChatRoomInfo implements Serialization {
         return this;
     }
 
-    public Long getCreation_time() {
-        return creation_time;
+    public Long getCreationTime() {
+        return creationTime;
     }
 
-    public ChatRoomInfo setCreation_time(Long creation_time) {
-        this.creation_time = creation_time;
+    public ChatRoomInfo setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
         return this;
     }
 
@@ -109,7 +109,7 @@ public class ChatRoomInfo implements Serialization {
         }
         object.put("MEMBERS", members);
         object.put("ATTRIBUTES", attributeMap);
-        object.put("CREATION_TIME", creation_time);
+        object.put("CREATION_TIME", creationTime);
         return BsonUtils.encode(object);
     }
 
@@ -131,7 +131,7 @@ public class ChatRoomInfo implements Serialization {
             this.addMember(memberInfo);
         }
         this.attributeMap = (Map<String, String>) object.get("ATTRIBUTES");
-        this.creation_time = (Long) object.get("CREATION_TIME");
+        this.creationTime = (Long) object.get("CREATION_TIME");
     }
 
     @Override
@@ -140,7 +140,7 @@ public class ChatRoomInfo implements Serialization {
                 "rid=" + rid +
                 ", memberInfoMap=" + memberInfoMap +
                 ", attributeMap=" + attributeMap +
-                ", creation_time=" + creation_time +
+                ", creationTime=" + creationTime +
                 '}';
     }
 }

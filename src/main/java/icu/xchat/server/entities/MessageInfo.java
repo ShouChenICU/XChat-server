@@ -41,6 +41,10 @@ public class MessageInfo implements Serialization {
      */
     private Long timeStamp;
 
+    public MessageInfo() {
+        this.signature = "";
+    }
+
     public Integer getId() {
         return id;
     }

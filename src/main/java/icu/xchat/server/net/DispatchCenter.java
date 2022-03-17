@@ -77,7 +77,12 @@ public class DispatchCenter {
      * @param messageInfo 消息信息
      */
     public void broadcastMessage(MessageInfo messageInfo) {
-        roomMap.get(messageInfo.getRid()).broadcastMessage(messageInfo);
+        ChatRoom chatRoom = roomMap.get(messageInfo.getRid());
+        if (chatRoom != null) {
+            chatRoom.broadcastMessage(messageInfo);
+        } else {
+            LOGGER.warn("异常消息：{}", messageInfo);
+        }
     }
 
     /**
@@ -95,11 +100,23 @@ public class DispatchCenter {
             if (!client.isLogin()) {
                 kick(client, "登陆超时");
                 closeClient(client);
-            } else {
-                client.setRidList(DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode()));
-                loginClientMap.put(client.getUserInfo().getUidCode(), client);
             }
         }, 5, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 将已登陆的用户加入调度器以及房间的在线用户列表中
+     *
+     * @param client 客户实体
+     */
+    public void putLoginClient(Client client) {
+        loginClientMap.put(client.getUserInfo().getUidCode(), client);
+        for (int rid : client.getRidList()) {
+            ChatRoom chatRoom = roomMap.get(rid);
+            if (chatRoom != null) {
+                chatRoom.putClint(client);
+            }
+        }
     }
 
     /**

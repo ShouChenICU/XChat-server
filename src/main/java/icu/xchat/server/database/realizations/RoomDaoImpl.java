@@ -8,10 +8,7 @@ import icu.xchat.server.utils.CacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,7 @@ public class RoomDaoImpl implements RoomDao {
             if (resultSet.next()) {
                 roomInfo = new ChatRoomInfo();
                 roomInfo.setRid(resultSet.getInt("rid"));
-                roomInfo.setCreation_time(resultSet.getLong("creation_time"));
+                roomInfo.setCreationTime(resultSet.getLong("creation_time"));
                 preparedStatement = connection.prepareStatement("SELECT \"key\",\"value\" FROM t_room_attributes WHERE rid = ?");
                 preparedStatement.setInt(1, rid);
                 resultSet = preparedStatement.executeQuery();
@@ -87,7 +84,7 @@ public class RoomDaoImpl implements RoomDao {
             connection.setAutoCommit(false);
             try {
                 // 插入房间信息
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO t_rooms (status,creation_time) VALUES(?,?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO t_rooms (status,creation_time) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setInt(1, 0);
                 long t = System.currentTimeMillis();
                 preparedStatement.setLong(2, t);
@@ -97,8 +94,8 @@ public class RoomDaoImpl implements RoomDao {
                 // 获取生成的主键id
                 ResultSet resultSet = preparedStatement.getGeneratedKeys();
                 if (resultSet.next()) {
-                    roomInfo.setRid(resultSet.getInt("rid"));
-                    roomInfo.setCreation_time(t);
+                    roomInfo.setRid(resultSet.getInt(1));
+                    roomInfo.setCreationTime(t);
                 }
                 // 插入房间属性集
                 preparedStatement = connection.prepareStatement("INSERT INTO t_room_attributes (rid,\"key\",value) VALUES(?,?,?)");
@@ -114,6 +111,7 @@ public class RoomDaoImpl implements RoomDao {
                 preparedStatement = connection.prepareStatement("INSERT INTO r_members (rid,uid_code,role,permission,join_time) VALUES(?,?,?,?,?)");
                 for (MemberInfo memberInfo : roomInfo.getMemberInfoMap().values()) {
                     memberInfo.setJoinTime(t);
+                    memberInfo.setRid(roomInfo.getRid());
                     preparedStatement.setInt(1, roomInfo.getRid());
                     preparedStatement.setString(2, memberInfo.getUidCode());
                     preparedStatement.setString(3, memberInfo.getRole());
