@@ -43,6 +43,13 @@ public class MessageSyncTask extends AbstractTask {
                     (long) object.get("TIME"),
                     (int) object.get("COUNT")
             );
+            // 如果列表为空，直接结束
+            if (messageIdList.isEmpty()) {
+                client.postPacket(new PacketBody()
+                        .setTaskId(this.taskId));
+                done();
+                return;
+            }
             CountDownLatch latch = new CountDownLatch(messageIdList.size());
             for (int id : messageIdList) {
                 MessageInfo messageInfo = DaoManager.getMessageDao().getMessageById(id);
