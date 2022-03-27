@@ -47,6 +47,14 @@ public class RoomSyncTask extends AbstractTask {
         if (packetBody.getId() == 0) {
             BSONObject object = new BasicBSONObject();
             ridList = DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode());
+            // 如果列表为空，直接结束
+            if (ridList.isEmpty()) {
+                WorkerThreadPool.execute(() -> client.postPacket(new PacketBody()
+                        .setTaskId(this.taskId)
+                        .setId(2)));
+                done();
+                return;
+            }
             latch = new CountDownLatch(ridList.size());
             object.put("RID_LIST", ridList);
             WorkerThreadPool.execute(() -> client.postPacket(packetBody.setData(BsonUtils.encode(object))));

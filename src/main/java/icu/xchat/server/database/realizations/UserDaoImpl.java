@@ -165,14 +165,13 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<String> getUidCodeListAboutUser(String uidCode) {
-        List<String> uidCodeList = null;
+        List<String> uidCodeList = new ArrayList<>();
         try (Connection connection = DataBaseManager.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT DISTINCT uid_code FROM r_members WHERE rid IN (SELECT rid FROM r_members WHERE uid_code = ?) AND uid_code != ?");
             preparedStatement.setString(1, uidCode);
             preparedStatement.setString(2, uidCode);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                uidCodeList = new ArrayList<>();
                 uidCodeList.add(resultSet.getString("uid_code"));
             }
         } catch (SQLException e) {

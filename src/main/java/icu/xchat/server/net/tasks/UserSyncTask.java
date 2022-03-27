@@ -31,6 +31,13 @@ public class UserSyncTask extends AbstractTask {
         WorkerThreadPool.execute(() -> {
             // 获取需要同步的所有用户识别码
             uidCodeList = DaoManager.getUserDao().getUidCodeListAboutUser(client.getUserInfo().getUidCode());
+            // 如果列表为空，直接结束
+            if (uidCodeList.isEmpty()) {
+                client.postPacket(new PacketBody()
+                        .setTaskId(this.taskId));
+                done();
+                return;
+            }
             // 新建一个计数器
             latch = new CountDownLatch(uidCodeList.size());
             for (String uidCode : uidCodeList) {

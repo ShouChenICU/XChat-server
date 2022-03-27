@@ -45,12 +45,6 @@ CREATE TABLE "r_title_own" (
 );
 
 -- ----------------------------
--- Table structure for sqlite_sequence
--- ----------------------------
-DROP TABLE IF EXISTS "sqlite_sequence";
-CREATE TABLE sqlite_sequence(name,seq);
-
--- ----------------------------
 -- Table structure for t_files
 -- ----------------------------
 DROP TABLE IF EXISTS "t_files";

@@ -55,6 +55,10 @@ public class UserInfo implements Serialization {
         this.attributeMap = new HashMap<>();
     }
 
+    public UserInfo(byte[] data) {
+        this.deserialize(data);
+    }
+
     public Integer getUid() {
         return uid;
     }

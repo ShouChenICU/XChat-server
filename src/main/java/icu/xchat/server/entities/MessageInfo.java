@@ -45,6 +45,10 @@ public class MessageInfo implements Serialization {
         this.signature = "";
     }
 
+    public MessageInfo(byte[] data) {
+        this.deserialize(data);
+    }
+
     public Integer getId() {
         return id;
     }
@@ -168,7 +172,7 @@ public class MessageInfo implements Serialization {
                 ", sender='" + sender + '\'' +
                 ", type=" + type +
                 ", content='" + content + '\'' +
-                ", signature='" + signature + '\'' +
+                ", signature=" + (signature == null || signature.trim().isEmpty() ? "" : signature.substring(0, 12) + "...") +
                 ", timeStamp=" + timeStamp +
                 '}';
     }

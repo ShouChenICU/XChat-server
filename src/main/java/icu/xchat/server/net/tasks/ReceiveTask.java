@@ -59,8 +59,7 @@ public class ReceiveTask extends AbstractTransmitTask {
     public void done() {
         WorkerThreadPool.execute(() -> {
             if (Objects.equals(dataType, TYPE_MSG_INFO)) {
-                MessageInfo messageInfo = new MessageInfo();
-                messageInfo.deserialize(dataContent);
+                MessageInfo messageInfo = new MessageInfo(dataContent);
                 // 验证身份是否一致
                 if (!Objects.equals(messageInfo.getSender(), client.getUserInfo().getUidCode())) {
                     client.postPacket(new PacketBody()
@@ -95,8 +94,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                 // 新建房间
                 if (Objects.equals(actionType, ACTION_CREATE)) {
                     // TODO: 2022/3/15 限制房间最大数量
-                    ChatRoomInfo roomInfo = new ChatRoomInfo();
-                    roomInfo.deserialize(dataContent);
+                    ChatRoomInfo roomInfo = new ChatRoomInfo(dataContent);
                     Map<String, MemberInfo> memberInfoMap = new HashMap<>();
                     // 设置房主
                     memberInfoMap.put(client.getUserInfo().getUidCode(), new MemberInfo()

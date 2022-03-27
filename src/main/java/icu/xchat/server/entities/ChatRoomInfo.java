@@ -35,6 +35,10 @@ public class ChatRoomInfo implements Serialization {
         this.memberInfoMap = new HashMap<>();
     }
 
+    public ChatRoomInfo(byte[] data) {
+        this.deserialize(data);
+    }
+
     public Integer getRid() {
         return rid;
     }
