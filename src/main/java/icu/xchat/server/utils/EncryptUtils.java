@@ -2,11 +2,12 @@ package icu.xchat.server.utils;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -21,7 +22,7 @@ public final class EncryptUtils {
     private static final String ENCRYPT_KEY_ALGORITHM = "AES";
     private static final String ENCRYPT_ALGORITHM = "AES/GCM/NoPadding";
 
-    public static SecretKey genAesKey() throws NoSuchAlgorithmException {
+    public static SecretKey genAesKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(ENCRYPT_KEY_ALGORITHM);
         keyGenerator.init(KEY_SIZE, new SecureRandom());
         return keyGenerator.generateKey();
@@ -34,48 +35,48 @@ public final class EncryptUtils {
         return iv;
     }
 
-    public static Cipher getEncryptCipher(SecretKey encryptKey, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public static Cipher getEncryptCipher(SecretKey encryptKey, byte[] iv) throws Exception {
         Cipher cipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, encryptKey, new GCMParameterSpec(T_LEN, iv));
         return cipher;
     }
 
-    public static Cipher getDecryptCipher(SecretKey decryptKey, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public static Cipher getDecryptCipher(SecretKey decryptKey, byte[] iv) throws Exception {
         Cipher cipher = Cipher.getInstance(ENCRYPT_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, decryptKey, new GCMParameterSpec(T_LEN, iv));
         return cipher;
     }
 
-    public static Cipher getEncryptCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance(SecurityKeyPairTool.getKeyPairType());
+    public static Cipher getEncryptCipher() throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PUBLIC_KEY, SecurityKeyPairTool.getPublicKey());
         return cipher;
     }
 
-    public static Cipher getDecryptCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance(SecurityKeyPairTool.getKeyPairType());
+    public static Cipher getDecryptCipher() throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PRIVATE_KEY, SecurityKeyPairTool.getPrivateKey());
         return cipher;
     }
 
-    public static Cipher getEncryptCipher(String algorithm, PublicKey publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance(algorithm);
+    public static Cipher getEncryptCipher(String algorithm, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PUBLIC_KEY, publicKey);
         return cipher;
     }
 
-    public static Cipher getDecryptCipher(String algorithm, PrivateKey privateKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = Cipher.getInstance(algorithm);
+    public static Cipher getDecryptCipher(String algorithm, PrivateKey privateKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PRIVATE_KEY, privateKey);
         return cipher;
     }
 
-    public static PublicKey getPublicKey(String algorithm, byte[] encode) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PublicKey getPublicKey(String algorithm, byte[] encode) throws Exception {
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         return keyFactory.generatePublic(new X509EncodedKeySpec(encode));
     }
 
-    public static PrivateKey getPrivateKey(String algorithm, byte[] encode) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PrivateKey getPrivateKey(String algorithm, byte[] encode) throws Exception {
         KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encode));
     }

@@ -4,12 +4,9 @@ import icu.xchat.server.net.PacketBody;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.zip.DataFormatException;
 
 /**
  * 网络传输帧工具类
@@ -28,7 +25,7 @@ public class PackageUtils {
     public PackageUtils() {
     }
 
-    public PackageUtils initCrypto(SecretKey key, byte[] encryptIV, byte[] decryptIV) throws NoSuchPaddingException, NoSuchAlgorithmException {
+    public PackageUtils initCrypto(SecretKey key, byte[] encryptIV, byte[] decryptIV) throws Exception {
         this.key = key;
         this.encryptIV = encryptIV;
         this.decryptIV = decryptIV;
@@ -57,7 +54,7 @@ public class PackageUtils {
         return this;
     }
 
-    public byte[] encodePacket(PacketBody packetBody) throws IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public byte[] encodePacket(PacketBody packetBody) throws Exception {
         BSONObject object = new BasicBSONObject();
         object.put("TASK_ID", packetBody.getTaskId());
         object.put("ID", packetBody.getId());
@@ -80,7 +77,7 @@ public class PackageUtils {
         return data;
     }
 
-    public PacketBody decodePacket(byte[] data) throws IllegalBlockSizeException, BadPaddingException, DataFormatException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public PacketBody decodePacket(byte[] data) throws Exception {
         BSONObject object;
         if (this.key != null) {
             this.decryptCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(T_LEN, decryptIV));
