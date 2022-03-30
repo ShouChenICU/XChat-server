@@ -4,8 +4,6 @@ import icu.xchat.server.constants.KeyPairAlgorithms;
 import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -21,7 +19,6 @@ import java.util.Objects;
  * @author shouchen
  */
 public class UserInfo implements Serialization {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserInfo.class);
     /**
      * 用户索引id
      */
@@ -181,8 +178,7 @@ public class UserInfo implements Serialization {
         if (pubKey != null) {
             try {
                 this.publicKey = KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec((byte[]) object.get("PUB_KEY")));
-            } catch (Exception e) {
-                LOGGER.warn("", e);
+            } catch (Exception ignored) {
             }
         } else {
             this.publicKey = null;

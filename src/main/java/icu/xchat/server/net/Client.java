@@ -164,7 +164,7 @@ public class Client extends NetNode {
         try {
             super.postPacket(packetBody);
         } catch (Exception e) {
-            DispatchCenter.getInstance().closeClient(this);
+            DispatchCenter.closeClient(this);
         }
     }
 
@@ -176,7 +176,7 @@ public class Client extends NetNode {
             if ("logout".equalsIgnoreCase(e.getMessage())) {
                 return;
             }
-            DispatchCenter.getInstance().closeClient(this);
+            DispatchCenter.closeClient(this);
             LOGGER.warn("", e);
         }
     }

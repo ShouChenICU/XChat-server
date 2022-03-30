@@ -22,12 +22,14 @@ import java.util.concurrent.TimeUnit;
 public class DispatchCenter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DispatchCenter.class);
     private static final ScheduledThreadPoolExecutor timerExecutor;
-    private static volatile DispatchCenter dispatchCenter;
-    private final List<Client> onlineClientList;
-    private final ConcurrentHashMap<String, Client> loginClientMap;
-    private final ConcurrentHashMap<Integer, ChatRoom> roomMap;
+    private static final List<Client> onlineClientList;
+    private static final ConcurrentHashMap<String, Client> loginClientMap;
+    private static final ConcurrentHashMap<Integer, ChatRoom> roomMap;
 
     static {
+        onlineClientList = new ArrayList<>();
+        loginClientMap = new ConcurrentHashMap<>();
+        roomMap = new ConcurrentHashMap<>();
         timerExecutor = new ScheduledThreadPoolExecutor(1, runnable -> {
             Thread thread = new Thread(runnable);
             thread.setDaemon(true);
@@ -36,38 +38,16 @@ public class DispatchCenter {
     }
 
     /**
-     * 获取单实例
-     *
-     * @return 单实例
-     */
-    public static DispatchCenter getInstance() {
-        if (dispatchCenter == null) {
-            synchronized (DispatchCenter.class) {
-                if (dispatchCenter == null) {
-                    dispatchCenter = new DispatchCenter();
-                }
-            }
-        }
-        return dispatchCenter;
-    }
-
-    private DispatchCenter() {
-        onlineClientList = new ArrayList<>();
-        loginClientMap = new ConcurrentHashMap<>();
-        roomMap = new ConcurrentHashMap<>();
-    }
-
-    /**
      * 加载聊天室
      */
-    public void loadChatRoom() {
+    public static void loadChatRoom() {
         List<Integer> ridList = DaoManager.getRoomDao().getRoomIdList();
         for (int rid : ridList) {
-            this.roomMap.put(rid, new ChatRoom(DaoManager.getRoomDao().getRoomInfoByRid(rid)));
+            roomMap.put(rid, new ChatRoom(DaoManager.getRoomDao().getRoomInfoByRid(rid)));
         }
     }
 
-    public void putChatRoom(ChatRoom chatRoom) {
+    public static void putChatRoom(ChatRoom chatRoom) {
         roomMap.put(chatRoom.getRid(), chatRoom);
     }
 
@@ -76,7 +56,7 @@ public class DispatchCenter {
      *
      * @param messageInfo 消息信息
      */
-    public void broadcastMessage(MessageInfo messageInfo) {
+    public static void broadcastMessage(MessageInfo messageInfo) {
         ChatRoom chatRoom = roomMap.get(messageInfo.getRid());
         if (chatRoom != null) {
             chatRoom.broadcastMessage(messageInfo);
@@ -90,7 +70,7 @@ public class DispatchCenter {
      *
      * @param channel 网络通道
      */
-    public void newClient(SocketChannel channel) throws IOException {
+    public static void newClient(SocketChannel channel) throws IOException {
         Client client = new Client(channel);
         synchronized (onlineClientList) {
             onlineClientList.add(client);
@@ -109,7 +89,7 @@ public class DispatchCenter {
      *
      * @param client 客户实体
      */
-    public void putLoginClient(Client client) {
+    public static void putLoginClient(Client client) {
         loginClientMap.put(client.getUserInfo().getUidCode(), client);
         for (int rid : client.getRidList()) {
             ChatRoom chatRoom = roomMap.get(rid);
@@ -124,7 +104,7 @@ public class DispatchCenter {
      *
      * @param client 客户
      */
-    private void heartTest(Client client) {
+    private static void heartTest(Client client) {
         if (System.currentTimeMillis() - client.getHeartTime() > 30000) {
             if (client.getChannel().isConnected()) {
                 closeClient(client);
@@ -139,7 +119,7 @@ public class DispatchCenter {
      *
      * @param client 客户
      */
-    public void closeClient(Client client) {
+    public static void closeClient(Client client) {
         if (client == null) {
             return;
         }
@@ -166,7 +146,7 @@ public class DispatchCenter {
      *
      * @param uidCode 用户uid
      */
-    public void closeClient(String uidCode) {
+    public static void closeClient(String uidCode) {
         closeClient(loginClientMap.get(uidCode));
     }
 
@@ -176,7 +156,7 @@ public class DispatchCenter {
      * @param client 用户
      * @param msg    信息
      */
-    public void kick(Client client, String msg) {
+    public static void kick(Client client, String msg) {
         if (client == null) {
             return;
         } else if (msg == null) {
@@ -192,7 +172,7 @@ public class DispatchCenter {
      * @param uidCode 用户识别码
      * @param msg     信息
      */
-    public void kick(String uidCode, String msg) {
+    public static void kick(String uidCode, String msg) {
         kick(loginClientMap.get(uidCode), msg);
     }
 
@@ -201,7 +181,7 @@ public class DispatchCenter {
      *
      * @param msg 信息
      */
-    public void kickAll(String msg) {
+    public static void kickAll(String msg) {
         synchronized (onlineClientList) {
             Iterator<Client> iterator = onlineClientList.iterator();
             while (iterator.hasNext()) {
@@ -220,7 +200,7 @@ public class DispatchCenter {
         }
     }
 
-    public void stop() {
+    public static void stop() {
         kickAll("服务器终止");
         // TODO: 2022/1/4
     }

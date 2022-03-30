@@ -89,7 +89,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                     return;
                 }
                 // 广播消息
-                DispatchCenter.getInstance().broadcastMessage(messageInfo);
+                DispatchCenter.broadcastMessage(messageInfo);
             } else if (Objects.equals(dataType, TYPE_ROOM_INFO)) {
                 // 新建房间
                 if (Objects.equals(actionType, ACTION_CREATE)) {
@@ -107,7 +107,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                         // 将新房间加入到调度器
                         ChatRoom chatRoom = new ChatRoom(roomInfo);
                         chatRoom.putClint(client);
-                        DispatchCenter.getInstance().putChatRoom(chatRoom);
+                        DispatchCenter.putChatRoom(chatRoom);
                         CountDownLatch latch = new CountDownLatch(1);
                         try {
                             // 推送这个新房间

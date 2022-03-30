@@ -128,7 +128,7 @@ public class UserLoginTask extends AbstractTask {
     @Override
     public void done() {
         client.setRidList(DaoManager.getRoomDao().getRoomIdListByUidCode(client.getUserInfo().getUidCode()));
-        DispatchCenter.getInstance().putLoginClient(client);
+        DispatchCenter.putLoginClient(client);
         /*
          * 验证成功，告诉客户登陆完毕
          */

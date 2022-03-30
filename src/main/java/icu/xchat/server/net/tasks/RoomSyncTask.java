@@ -81,7 +81,7 @@ public class RoomSyncTask extends AbstractTask {
                     } catch (NoSuchAlgorithmException e) {
                         LOGGER.error("", e);
                         terminate(e.getMessage());
-                        DispatchCenter.getInstance().closeClient(client);
+                        DispatchCenter.closeClient(client);
                     }
                     byte[] hash = (byte[]) object.get("HASH");
                     if (!Arrays.equals(digest, hash)) {

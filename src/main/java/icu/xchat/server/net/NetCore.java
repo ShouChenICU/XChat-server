@@ -18,7 +18,6 @@ public class NetCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetCore.class);
     private static ServerSocketChannel serverSocketChannel;
     private static Selector mainSelector;
-    private static DispatchCenter dispatchCenter;
     private static boolean isRun;
 
     static {
@@ -27,7 +26,6 @@ public class NetCore {
             serverSocketChannel.configureBlocking(false);
             mainSelector = Selector.open();
             serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
-            dispatchCenter = DispatchCenter.getInstance();
             isRun = true;
         } catch (Exception e) {
             LOGGER.error("", e);
@@ -69,7 +67,7 @@ public class NetCore {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel channel = serverChannel.accept();
                         channel.configureBlocking(false);
-                        dispatchCenter.newClient(channel);
+                        DispatchCenter.newClient(channel);
                     } catch (IOException e) {
                         LOGGER.warn("", e);
                     }
@@ -96,7 +94,7 @@ public class NetCore {
         } catch (IOException e) {
             LOGGER.error("", e);
         }
-        dispatchCenter.stop();
+        DispatchCenter.stop();
     }
 
     public static boolean isRun() {
