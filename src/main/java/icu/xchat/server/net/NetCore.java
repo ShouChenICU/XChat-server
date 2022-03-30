@@ -28,6 +28,7 @@ public class NetCore {
             serverSocketChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
             isRun = true;
         } catch (Exception e) {
+            isRun = false;
             LOGGER.error("", e);
         }
     }
@@ -50,7 +51,7 @@ public class NetCore {
         while (isRun) {
             try {
                 mainSelector.select();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error("", e);
                 return;
             }
@@ -60,7 +61,7 @@ public class NetCore {
                 keyIterator.remove();
                 if (key.isReadable()) {
                     Client client = (Client) key.attachment();
-                    key.cancel();
+                    key.interestOps(0);
                     WorkerThreadPool.execute(client::doRead);
                 } else if (key.isAcceptable()) {
                     try {
