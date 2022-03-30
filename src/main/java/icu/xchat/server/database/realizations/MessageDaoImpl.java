@@ -99,7 +99,7 @@ public class MessageDaoImpl implements MessageDao {
     public List<Integer> getMessageIdListByLatestTimeAndCount(int rid, long time, int count) {
         List<Integer> messageIdList = new ArrayList<>();
         try (Connection connection = DataBaseManager.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM t_messages WHERE room_id = ? AND time_stamp < ? AND is_delete = 0 ORDER BY time_stamp LIMIT ?");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM t_messages WHERE room_id = ? AND time_stamp < ? AND is_delete = 0 ORDER BY time_stamp DESC LIMIT ?");
             preparedStatement.setInt(1, rid);
             preparedStatement.setLong(2, time);
             preparedStatement.setInt(3, count);
