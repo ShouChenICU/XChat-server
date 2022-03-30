@@ -10,7 +10,7 @@
  Target Server Version : 3030001
  File Encoding         : 65001
 
- Date: 17/03/2022 15:20:30
+ Date: 30/03/2022 22:31:31
 */
 
 PRAGMA foreign_keys = false;
@@ -25,8 +25,7 @@ CREATE TABLE "r_members" (
   "role" text NOT NULL DEFAULT '',
   "permission" integer NOT NULL DEFAULT 7,
   "join_time" integer NOT NULL DEFAULT 0,
-  PRIMARY KEY ("rid", "uid_code"),
-  CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("rid") ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY ("rid", "uid_code")
 );
 
 -- ----------------------------
@@ -38,11 +37,14 @@ CREATE TABLE "r_title_own" (
   "uid" integer NOT NULL,
   "img_file_id" integer DEFAULT 0,
   "creation_time" integer NOT NULL,
-  PRIMARY KEY ("tid", "uid"),
-  CONSTRAINT "tid" FOREIGN KEY ("tid") REFERENCES "t_titles" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "img_file_id" FOREIGN KEY ("img_file_id") REFERENCES "t_files" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY ("tid", "uid")
 );
+
+-- ----------------------------
+-- Table structure for sqlite_sequence
+-- ----------------------------
+DROP TABLE IF EXISTS "sqlite_sequence";
+CREATE TABLE sqlite_sequence(name,seq);
 
 -- ----------------------------
 -- Table structure for t_files
@@ -71,9 +73,7 @@ CREATE TABLE "t_mails" (
   "receiver_id" integer NOT NULL,
   "theme" text NOT NULL DEFAULT '',
   "content" text NOT NULL DEFAULT '',
-  "creation_time" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "sender_id" FOREIGN KEY ("sender_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT "receiver_id" FOREIGN KEY ("receiver_id") REFERENCES "t_users" ("uid") ON DELETE NO ACTION ON UPDATE CASCADE
+  "creation_time" integer NOT NULL DEFAULT 0
 );
 
 -- ----------------------------
@@ -82,14 +82,13 @@ CREATE TABLE "t_mails" (
 DROP TABLE IF EXISTS "t_messages";
 CREATE TABLE "t_messages" (
   "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "room_id" integer NOT NULL,
+  "room_id" text NOT NULL,
   "sender" text NOT NULL,
   "type" integer NOT NULL,
   "content" text NOT NULL,
   "signature" text NOT NULL DEFAULT '',
   "is_delete" integer NOT NULL DEFAULT 0,
-  "time_stamp" integer NOT NULL DEFAULT 0,
-  CONSTRAINT "room_id" FOREIGN KEY ("room_id") REFERENCES "t_rooms" ("rid") ON DELETE NO ACTION ON UPDATE CASCADE
+  "time_stamp" integer NOT NULL DEFAULT 0
 );
 
 -- ----------------------------
@@ -100,8 +99,7 @@ CREATE TABLE "t_room_attributes" (
   "rid" integer NOT NULL,
   "key" text NOT NULL,
   "value" text,
-  PRIMARY KEY ("rid", "key"),
-  CONSTRAINT "rid" FOREIGN KEY ("rid") REFERENCES "t_rooms" ("rid") ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY ("rid", "key")
 );
 
 -- ----------------------------
@@ -129,11 +127,10 @@ CREATE TABLE "t_titles" (
 -- ----------------------------
 DROP TABLE IF EXISTS "t_user_attributes";
 CREATE TABLE "t_user_attributes" (
-  "uid" integer NOT NULL,
+  "uid" text NOT NULL,
   "key" text NOT NULL,
   "value" text NOT NULL,
-  PRIMARY KEY ("uid", "key"),
-  CONSTRAINT "uid" FOREIGN KEY ("uid") REFERENCES "t_users" ("uid") ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY ("uid", "key")
 );
 
 -- ----------------------------
@@ -148,5 +145,24 @@ CREATE TABLE "t_users" (
   "signature" text NOT NULL DEFAULT '',
   "time_stamp" integer NOT NULL DEFAULT 0
 );
+
+-- ----------------------------
+-- Auto increment value for t_mails
+-- ----------------------------
+
+-- ----------------------------
+-- Auto increment value for t_messages
+-- ----------------------------
+UPDATE "main"."sqlite_sequence" SET seq = 24 WHERE name = 't_messages';
+
+-- ----------------------------
+-- Auto increment value for t_rooms
+-- ----------------------------
+UPDATE "main"."sqlite_sequence" SET seq = 2 WHERE name = 't_rooms';
+
+-- ----------------------------
+-- Auto increment value for t_users
+-- ----------------------------
+UPDATE "main"."sqlite_sequence" SET seq = 3 WHERE name = 't_users';
 
 PRAGMA foreign_keys = true;

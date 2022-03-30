@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 网络核心
@@ -16,6 +17,7 @@ import java.util.Set;
  */
 public class NetCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetCore.class);
+    private static final ReentrantLock REG_LOCK = new ReentrantLock();
     private static ServerSocketChannel serverSocketChannel;
     private static Selector mainSelector;
     private static boolean isRun;
@@ -51,6 +53,8 @@ public class NetCore {
         while (isRun) {
             try {
                 mainSelector.select();
+                REG_LOCK.lock();
+                REG_LOCK.unlock();
             } catch (Exception e) {
                 LOGGER.error("", e);
                 return;
@@ -82,9 +86,13 @@ public class NetCore {
     }
 
     public static SelectionKey register(SocketChannel channel, int ops, NetNode netNode) throws ClosedChannelException {
-        SelectionKey selectionKey = channel.register(mainSelector, ops, netNode);
-        mainSelector.wakeup();
-        return selectionKey;
+        REG_LOCK.lock();
+        try {
+            mainSelector.wakeup();
+            return channel.register(mainSelector, ops, netNode);
+        } finally {
+            REG_LOCK.unlock();
+        }
     }
 
     public static void stop() {
