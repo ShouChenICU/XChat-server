@@ -43,7 +43,7 @@ public class IdentitySyncTask extends AbstractTask {
         if (packetBody.getId() == 0) {
             BSONObject object = BsonUtils.decode(packetBody.getData());
             byte[] pubKey = (byte[]) object.get("PUBLIC_KEY");
-            if (!Objects.equals(client.getUserInfo().getUidCode(), IdentityUtils.getUidCodeByPublicKeyCode(pubKey))) {
+            if (!Objects.equals(client.getUserInfo().getUidCode(), IdentityUtils.getCodeByPublicKeyCode(pubKey))) {
                 throw new Exception("身份不匹配！");
             }
             KeyFactory keyFactory = KeyFactory.getInstance(KeyPairAlgorithms.RSA);

@@ -59,13 +59,13 @@ public final class EncryptUtils {
         return cipher;
     }
 
-    public static Cipher getEncryptCipher(String algorithm, PublicKey publicKey) throws Exception {
+    public static Cipher getEncryptCipher(PublicKey publicKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PUBLIC_KEY, publicKey);
         return cipher;
     }
 
-    public static Cipher getDecryptCipher(String algorithm, PrivateKey privateKey) throws Exception {
+    public static Cipher getDecryptCipher(PrivateKey privateKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.PRIVATE_KEY, privateKey);
         return cipher;

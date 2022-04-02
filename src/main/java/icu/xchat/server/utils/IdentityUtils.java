@@ -10,12 +10,12 @@ import java.util.Base64;
 public class IdentityUtils {
 
     /**
-     * 从公钥计算用户标识码
+     * 从公钥计算标识码
      *
      * @param publicKeyCode 公钥
-     * @return 用户标识码
+     * @return 标识码
      */
-    public static String getUidCodeByPublicKeyCode(byte[] publicKeyCode) throws NoSuchAlgorithmException {
+    public static String getCodeByPublicKeyCode(byte[] publicKeyCode) throws NoSuchAlgorithmException {
         byte[] digestCode;
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         digestCode = messageDigest.digest(publicKeyCode);

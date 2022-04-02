@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 网络核心
@@ -17,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NetCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetCore.class);
-    private static final ReentrantLock REG_LOCK = new ReentrantLock();
     private static ServerSocketChannel serverSocketChannel;
     private static Selector mainSelector;
     private static boolean isRun;
@@ -53,8 +54,6 @@ public class NetCore {
         while (isRun) {
             try {
                 mainSelector.select();
-                REG_LOCK.lock();
-                REG_LOCK.unlock();
             } catch (Exception e) {
                 LOGGER.error("", e);
                 return;
@@ -64,34 +63,30 @@ public class NetCore {
                 SelectionKey key = keyIterator.next();
                 keyIterator.remove();
                 if (key.isReadable()) {
-                    Client client = (Client) key.attachment();
                     key.interestOps(0);
-                    WorkerThreadPool.execute(client::doRead);
+                    AbstractNetIO netIO = (AbstractNetIO) key.attachment();
+                    if (netIO != null) {
+                        WorkerThreadPool.execute(() -> {
+                                    try {
+                                        netIO.doRead();
+                                    } catch (Exception e) {
+                                        netIO.exceptionHandler(e);
+                                    }
+                                }
+                        );
+                    }
                 } else if (key.isAcceptable()) {
                     try {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel channel = serverChannel.accept();
                         channel.configureBlocking(false);
-                        DispatchCenter.newClient(channel);
+                        SelectionKey selectionKey = channel.register(mainSelector, 0);
+                        DispatchCenter.newConnect(selectionKey);
                     } catch (IOException e) {
                         LOGGER.warn("", e);
                     }
                 }
             }
-        }
-    }
-
-    public static void wakeup() {
-        mainSelector.wakeup();
-    }
-
-    public static SelectionKey register(SocketChannel channel, int ops, NetNode netNode) throws ClosedChannelException {
-        REG_LOCK.lock();
-        try {
-            mainSelector.wakeup();
-            return channel.register(mainSelector, ops, netNode);
-        } finally {
-            REG_LOCK.unlock();
         }
     }
 
@@ -103,7 +98,6 @@ public class NetCore {
         } catch (IOException e) {
             LOGGER.error("", e);
         }
-        DispatchCenter.stop();
     }
 
     public static boolean isRun() {

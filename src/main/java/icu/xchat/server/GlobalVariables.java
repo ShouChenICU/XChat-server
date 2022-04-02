@@ -14,7 +14,7 @@ final public class GlobalVariables {
     /**
      * 副版本号
      */
-    public static final Integer MINOR_VERSION = 0;
+    public static final Integer MINOR_VERSION = 1;
     /**
      * 修订号
      */
@@ -30,5 +30,5 @@ final public class GlobalVariables {
     /**
      * 通讯协议版本
      */
-    public static final Integer PROTOCOL_VERSION = 1;
+    public static final Integer PROTOCOL_VERSION = 2;
 }

@@ -146,23 +146,4 @@ CREATE TABLE "t_users" (
   "time_stamp" integer NOT NULL DEFAULT 0
 );
 
--- ----------------------------
--- Auto increment value for t_mails
--- ----------------------------
-
--- ----------------------------
--- Auto increment value for t_messages
--- ----------------------------
-UPDATE "main"."sqlite_sequence" SET seq = 24 WHERE name = 't_messages';
-
--- ----------------------------
--- Auto increment value for t_rooms
--- ----------------------------
-UPDATE "main"."sqlite_sequence" SET seq = 2 WHERE name = 't_rooms';
-
--- ----------------------------
--- Auto increment value for t_users
--- ----------------------------
-UPDATE "main"."sqlite_sequence" SET seq = 3 WHERE name = 't_users';
-
 PRAGMA foreign_keys = true;

@@ -9,10 +9,7 @@ import icu.xchat.server.entities.ChatRoomInfo;
 import icu.xchat.server.entities.MemberInfo;
 import icu.xchat.server.entities.MessageInfo;
 import icu.xchat.server.exceptions.TaskException;
-import icu.xchat.server.net.ChatRoom;
-import icu.xchat.server.net.DispatchCenter;
-import icu.xchat.server.net.PacketBody;
-import icu.xchat.server.net.WorkerThreadPool;
+import icu.xchat.server.net.*;
 import icu.xchat.server.utils.BsonUtils;
 import org.bson.BSONObject;
 
@@ -89,7 +86,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                     return;
                 }
                 // 广播消息
-                DispatchCenter.broadcastMessage(messageInfo);
+                ChatRoomManager.broadcastMessage(messageInfo);
             } else if (Objects.equals(dataType, TYPE_ROOM_INFO)) {
                 // 新建房间
                 if (Objects.equals(actionType, ACTION_CREATE)) {
@@ -107,7 +104,7 @@ public class ReceiveTask extends AbstractTransmitTask {
                         // 将新房间加入到调度器
                         ChatRoom chatRoom = new ChatRoom(roomInfo);
                         chatRoom.putClint(client);
-                        DispatchCenter.putChatRoom(chatRoom);
+                        ChatRoomManager.putChatRoom(chatRoom);
                         CountDownLatch latch = new CountDownLatch(1);
                         try {
                             // 推送这个新房间

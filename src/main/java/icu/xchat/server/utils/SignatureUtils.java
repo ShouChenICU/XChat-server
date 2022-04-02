@@ -51,7 +51,7 @@ public final class SignatureUtils {
      */
     public static boolean checkSign(MessageInfo messageInfo, PublicKey publicKey) {
         try {
-            if (!Objects.equals(messageInfo.getSender(), IdentityUtils.getUidCodeByPublicKeyCode(publicKey.getEncoded()))) {
+            if (!Objects.equals(messageInfo.getSender(), IdentityUtils.getCodeByPublicKeyCode(publicKey.getEncoded()))) {
                 return false;
             }
             BSONObject object = new BasicBSONObject();

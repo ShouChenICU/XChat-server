@@ -1,14 +1,13 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.constants.TaskTypes;
+import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.UserInfo;
 import icu.xchat.server.exceptions.TaskException;
 import icu.xchat.server.net.tasks.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,16 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author shouchen
  */
-public class Client extends NetNode {
+public abstract class Client extends NetNode {
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
     /**
      * 任务map
      */
     private final ConcurrentHashMap<Integer, Task> taskMap;
-    /**
-     * 用户信息
-     */
-    private UserInfo userInfo;
     /**
      * 用户加入的房间列表
      */
@@ -40,25 +35,19 @@ public class Client extends NetNode {
      */
     private int taskId;
 
-    public Client(SocketChannel channel) throws IOException {
-        super(channel);
+    public abstract UserInfo getUserInfo();
+
+    public Client() {
         this.taskMap = new ConcurrentHashMap<>();
-        this.userInfo = null;
         this.ridList = new ArrayList<>();
         this.taskId = -1;
     }
 
-    public boolean isLogin() {
-        return userInfo != null;
-    }
-
-    public UserInfo getUserInfo() {
-        return userInfo;
-    }
-
-    public Client setUserInfo(UserInfo userInfo) {
-        this.userInfo = userInfo;
-        return this;
+    @Override
+    public void update(AbstractNetIO abstractNetIO) {
+        super.update(abstractNetIO);
+        this.ridList = DaoManager.getRoomDao().getRoomIdListByUidCode(getUserInfo().getUidCode());
+        // TODO: 2022/4/2
     }
 
     /**
@@ -67,16 +56,13 @@ public class Client extends NetNode {
      * @param packetBody 包
      */
     @Override
-    protected void handlePacket(PacketBody packetBody) throws Exception {
+    protected void packageHandler(PacketBody packetBody) throws Exception {
         if (packetBody.getTaskId() != 0) {
             Task task = taskMap.get(packetBody.getTaskId());
             if (task == null) {
                 switch (packetBody.getTaskType()) {
                     case TaskTypes.COMMAND:
                         task = new CommandTask();
-                        break;
-                    case TaskTypes.LOGIN:
-                        task = new UserLoginTask(this);
                         break;
                     case TaskTypes.TRANSMIT:
                         task = new ReceiveTask();
@@ -151,33 +137,20 @@ public class Client extends NetNode {
         this.taskMap.remove(taskId);
     }
 
-    @Override
-    public void close() throws IOException {
-        super.close();
+    public void close() {
         for (Task task : taskMap.values()) {
             task.terminate("Closed");
         }
     }
 
     @Override
-    public void postPacket(PacketBody packetBody) {
+    protected void exceptionHandler(Exception exception) {
+        LOGGER.warn("", exception);
         try {
-            super.postPacket(packetBody);
+            disconnect();
         } catch (Exception e) {
-            DispatchCenter.closeClient(this);
-        }
-    }
-
-    @Override
-    public void doRead() {
-        try {
-            super.doRead();
-        } catch (Exception e) {
-            if ("logout".equalsIgnoreCase(e.getMessage())) {
-                return;
-            }
-            DispatchCenter.closeClient(this);
             LOGGER.warn("", e);
         }
+        // TODO: 2022/3/31
     }
 }

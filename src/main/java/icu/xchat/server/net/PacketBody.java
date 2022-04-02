@@ -1,13 +1,16 @@
 package icu.xchat.server.net;
 
-import java.io.Serializable;
+import icu.xchat.server.entities.Serialization;
+import icu.xchat.server.utils.BsonUtils;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 
 /**
  * 网络传输内容帧
  *
  * @author shouchen
  */
-public class PacketBody implements Serializable {
+public class PacketBody implements Serialization {
     /**
      * 任务id
      */
@@ -29,6 +32,10 @@ public class PacketBody implements Serializable {
         this.taskId = 0;
         this.id = 0;
         this.data = null;
+    }
+
+    public PacketBody(byte[] data) {
+        this.deserialize(data);
     }
 
     public int getTaskId() {
@@ -65,5 +72,24 @@ public class PacketBody implements Serializable {
     public PacketBody setData(byte[] data) {
         this.data = data;
         return this;
+    }
+
+    @Override
+    public byte[] serialize() {
+        BSONObject object = new BasicBSONObject();
+        object.put("ID", id);
+        object.put("TASK_ID", taskId);
+        object.put("TASK_TYPE", taskType);
+        object.put("DATA", data);
+        return BsonUtils.encode(object);
+    }
+
+    @Override
+    public void deserialize(byte[] data) {
+        BSONObject object = BsonUtils.decode(data);
+        this.taskId = (int) object.get("TASK_ID");
+        this.id = (int) object.get("ID");
+        this.taskType = (int) object.get("TASK_TYPE");
+        this.data = (byte[]) object.get("DATA");
     }
 }

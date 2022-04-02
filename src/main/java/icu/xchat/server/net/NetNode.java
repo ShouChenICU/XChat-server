@@ -1,145 +1,63 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.exceptions.PacketException;
-import icu.xchat.server.utils.PackageUtils;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.TimeoutException;
+import icu.xchat.server.utils.Encryptor;
 
 /**
  * 网络节点
  *
  * @author shouchen
  */
-public abstract class NetNode {
-    private final SelectionKey selectionKey;
-    private final SocketChannel channel;
-    private final ByteBuffer readBuffer;
-    private final ByteBuffer writeBuffer;
-    private final PackageUtils packageUtils;
+public abstract class NetNode extends AbstractNetIO {
+    private Encryptor encryptor;
     private long heartTime;
-    private int packetStatus;
-    private int packetLength;
-    private byte[] packetData;
 
-    public NetNode(SocketChannel channel) throws ClosedChannelException {
-        this.channel = channel;
-        this.readBuffer = ByteBuffer.allocateDirect(4096);
-        this.writeBuffer = ByteBuffer.allocateDirect(4096);
-        this.packageUtils = new PackageUtils();
+    public NetNode() {
+        super();
         this.heartTime = System.currentTimeMillis();
-        this.packetStatus = 0;
-        this.packetLength = 0;
-        this.packetData = null;
-        this.selectionKey = NetCore.register(channel, SelectionKey.OP_READ, this);
     }
 
-    public SelectionKey getSelectionKey() {
-        return selectionKey;
+    public NetNode updateEncryptor(Encryptor encryptor) {
+        this.encryptor = encryptor;
+        return this;
     }
 
-    public SocketChannel getChannel() {
-        return channel;
+    @Override
+    protected void dataHandler(byte[] data) throws Exception {
+        packageHandler(new PacketBody(encryptor.decode(data)));
     }
-
-    public PackageUtils getPackageUtils() {
-        return packageUtils;
-    }
-
-    abstract void handlePacket(PacketBody packetBody) throws Exception;
 
     /**
-     * 读取并预处理数据
+     * 处理一个包
+     *
+     * @param packetBody 数据包
      */
-    public void doRead() throws Exception {
-        int len;
-        while ((len = channel.read(readBuffer)) != 0) {
-            if (len == -1) {
-                throw new IOException("通道关闭");
-            }
-            readBuffer.flip();
-            while (readBuffer.hasRemaining()) {
-                switch (packetStatus) {
-                    case 0:
-                        packetLength = readBuffer.get() & 0xff;
-                        packetStatus = 1;
-                        break;
-                    case 1:
-                        packetLength += (readBuffer.get() & 0xff) << 8;
-                        packetData = new byte[packetLength];
-                        packetLength = 0;
-                        packetStatus = 2;
-                        break;
-                    case 2:
-                        for (; readBuffer.hasRemaining() && packetLength < packetData.length; packetLength++) {
-                            packetData[packetLength] = readBuffer.get();
-                        }
-                        if (packetLength == packetData.length) {
-                            this.heartTime = System.currentTimeMillis();
-                            handlePacket(packageUtils.decodePacket(packetData));
-                            packetStatus = 0;
-                        }
-                        break;
-                }
-            }
-            readBuffer.clear();
-        }
-        selectionKey.interestOps(SelectionKey.OP_READ);
-        NetCore.wakeup();
-    }
+    protected abstract void packageHandler(PacketBody packetBody) throws Exception;
 
     /**
      * 发送一个包
      *
      * @param packetBody 包
      */
-    @SuppressWarnings("BusyWait")
-    public void postPacket(PacketBody packetBody) throws Exception {
-        synchronized (channel) {
-            writeBuffer.clear();
-            byte[] dat = packageUtils.encodePacket(packetBody);
-            int length = dat.length;
-            if (length > 65535) {
-                throw new PacketException("包长度超限: " + length);
-            }
-            writeBuffer.put((byte) (length % 256))
-                    .put((byte) (length / 256));
-            int offset = 0;
-            while (offset < dat.length) {
-                length = Math.min(writeBuffer.remaining(), dat.length - offset);
-                writeBuffer.put(dat, offset, length);
-                offset += length;
-                writeBuffer.flip();
-                int waitCount = 0;
-                while (writeBuffer.hasRemaining()) {
-                    if (channel.write(writeBuffer) == 0) {
-                        if (waitCount >= 10) {
-                            throw new TimeoutException("写入超时");
-                        }
-                        Thread.sleep(100);
-                        waitCount++;
-                    } else {
-                        waitCount = 0;
-                    }
+    public boolean postPacket(PacketBody packetBody) {
+        try {
+            synchronized (this) {
+                byte[] dat = encryptor.encode(packetBody.serialize());
+                int length = dat.length;
+                if (length > 65535) {
+                    throw new PacketException("Packet Length Exceeded: " + length);
                 }
-                writeBuffer.clear();
+                doWrite(dat);
             }
+            this.heartTime = System.currentTimeMillis();
+            return true;
+        } catch (Exception e) {
+            exceptionHandler(e);
+            return false;
         }
-        this.heartTime = System.currentTimeMillis();
     }
 
     public long getHeartTime() {
         return heartTime;
-    }
-
-    public void close() throws IOException {
-        this.selectionKey.cancel();
-        if (this.channel.isConnected()) {
-            this.channel.close();
-        }
     }
 }
