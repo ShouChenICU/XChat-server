@@ -27,6 +27,11 @@ public abstract class NetNode extends AbstractNetIO {
         packageHandler(new PacketBody(encryptor.decode(data)));
     }
 
+    @Override
+    public void update(AbstractNetIO abstractNetIO) {
+        super.update(abstractNetIO);
+    }
+
     /**
      * 处理一个包
      *
@@ -39,7 +44,7 @@ public abstract class NetNode extends AbstractNetIO {
      *
      * @param packetBody 包
      */
-    public boolean postPacket(PacketBody packetBody) {
+    public void postPacket(PacketBody packetBody) {
         try {
             synchronized (this) {
                 byte[] dat = encryptor.encode(packetBody.serialize());
@@ -50,10 +55,8 @@ public abstract class NetNode extends AbstractNetIO {
                 doWrite(dat);
             }
             this.heartTime = System.currentTimeMillis();
-            return true;
         } catch (Exception e) {
             exceptionHandler(e);
-            return false;
         }
     }
 

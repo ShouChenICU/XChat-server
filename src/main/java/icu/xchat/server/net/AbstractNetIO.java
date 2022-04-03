@@ -93,7 +93,14 @@ public abstract class AbstractNetIO {
     public void doRead() throws Exception {
         int len;
         SocketChannel channel = (SocketChannel) key.channel();
-        while ((len = channel.read(readBuffer)) != 0) {
+        while (true) {
+            if (!channel.isConnected()) {
+                return;
+            }
+            len = channel.read(readBuffer);
+            if (len == 0) {
+                break;
+            }
             if (len == -1) {
                 throw new IOException("channel closed!");
             }

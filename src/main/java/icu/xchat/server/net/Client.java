@@ -93,7 +93,7 @@ public abstract class Client extends NetNode {
             }
         } else {
             if (Objects.equals(packetBody.getTaskType(), TaskTypes.LOGOUT)) {
-                throw new Exception("logout");
+                logout();
             }
         }
     }
@@ -137,9 +137,19 @@ public abstract class Client extends NetNode {
         this.taskMap.remove(taskId);
     }
 
-    public void close() {
+    /**
+     * 登出
+     */
+    public void logout() {
         for (Task task : taskMap.values()) {
             task.terminate("Closed");
+        }
+        taskMap.clear();
+        taskId = -1;
+        try {
+            disconnect();
+        } catch (Exception e) {
+            LOGGER.warn("", e);
         }
     }
 
@@ -147,7 +157,8 @@ public abstract class Client extends NetNode {
     protected void exceptionHandler(Exception exception) {
         LOGGER.warn("", exception);
         try {
-            disconnect();
+//            disconnect();
+            logout();
         } catch (Exception e) {
             LOGGER.warn("", e);
         }
