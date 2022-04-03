@@ -4,7 +4,6 @@ import icu.xchat.server.constants.TaskTypes;
 import icu.xchat.server.database.DaoManager;
 import icu.xchat.server.entities.ChatRoomInfo;
 import icu.xchat.server.exceptions.TaskException;
-import icu.xchat.server.net.DispatchCenter;
 import icu.xchat.server.net.PacketBody;
 import icu.xchat.server.net.WorkerThreadPool;
 import icu.xchat.server.utils.BsonUtils;
@@ -98,6 +97,8 @@ public class RoomSyncTask extends AbstractTask {
                             LOGGER.error("", e);
                             terminate(e.getMessage());
                         }
+                    } else {
+                        latch.countDown();
                     }
                 }
                 if (ridList.isEmpty()) {

@@ -73,4 +73,16 @@ public class ClientManager {
             READ_WRITE_LOCK.writeLock().unlock();
         }
     }
+
+    /**
+     * 卸载客户
+     */
+    public static void unloadClient(String uidCode) {
+        READ_WRITE_LOCK.writeLock().lock();
+        try {
+            CLIENT_MAP.remove(uidCode);
+        } finally {
+            READ_WRITE_LOCK.writeLock().unlock();
+        }
+    }
 }

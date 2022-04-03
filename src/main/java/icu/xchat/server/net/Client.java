@@ -47,6 +47,7 @@ public abstract class Client extends NetNode {
     public void update(AbstractNetIO abstractNetIO) {
         super.update(abstractNetIO);
         this.ridList = DaoManager.getRoomDao().getRoomIdListByUidCode(getUserInfo().getUidCode());
+        ChatRoomManager.updateClient(this);
         // TODO: 2022/4/2
     }
 
@@ -146,6 +147,8 @@ public abstract class Client extends NetNode {
         }
         taskMap.clear();
         taskId = -1;
+        ChatRoomManager.removeClient(this);
+        ClientManager.unloadClient(getUserInfo().getUidCode());
         try {
             disconnect();
         } catch (Exception e) {

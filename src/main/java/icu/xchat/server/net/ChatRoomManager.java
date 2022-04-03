@@ -95,13 +95,13 @@ public class ChatRoomManager {
      * 移除用户
      */
     public static void removeClient(Client client) {
-        READ_WRITE_LOCK.writeLock().lock();
+        READ_WRITE_LOCK.readLock().lock();
         try {
             for (int rid : client.getRidList()) {
                 ROOM_MAP.get(rid).removeClient(client.getUserInfo().getUidCode());
             }
         } finally {
-            READ_WRITE_LOCK.writeLock().unlock();
+            READ_WRITE_LOCK.readLock().unlock();
         }
     }
 }
