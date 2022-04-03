@@ -8,6 +8,7 @@ import icu.xchat.server.net.tasks.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.channels.ClosedChannelException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,7 +159,9 @@ public abstract class Client extends NetNode {
 
     @Override
     protected void exceptionHandler(Exception exception) {
-        LOGGER.warn("", exception);
+        if (exception.getClass() != ClosedChannelException.class) {
+            LOGGER.warn("", exception);
+        }
         try {
 //            disconnect();
             logout();

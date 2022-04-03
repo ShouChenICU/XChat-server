@@ -1,7 +1,7 @@
 package icu.xchat.server.net;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeoutException;
@@ -102,7 +102,7 @@ public abstract class AbstractNetIO {
                 break;
             }
             if (len == -1) {
-                throw new IOException("channel closed!");
+                throw new ClosedChannelException();
             }
             readBuffer.flip();
             while (readBuffer.hasRemaining()) {

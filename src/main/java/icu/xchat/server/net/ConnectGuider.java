@@ -1,10 +1,8 @@
 package icu.xchat.server.net;
 
 import icu.xchat.server.GlobalVariables;
-import icu.xchat.server.utils.BsonUtils;
-import icu.xchat.server.utils.EncryptUtils;
-import icu.xchat.server.utils.Encryptor;
-import icu.xchat.server.utils.SecurityKeyPairTool;
+import icu.xchat.server.constants.KeyPairAlgorithms;
+import icu.xchat.server.utils.*;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.slf4j.Logger;
@@ -15,6 +13,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
@@ -74,9 +74,18 @@ public class ConnectGuider extends AbstractNetIO {
             data = encryptor.decode(data);
             object = BsonUtils.decode(data);
             String uidCode = (String) object.get("UID_CODE");
+            byte[] pubKeyCode = (byte[]) object.get("PUB_KEY");
             client = ClientManager.loadClient(uidCode);
-            // 找不到用户
-            if (client == null) {
+            if (!Objects.equals(IdentityUtils.getCodeByPublicKeyCode(pubKeyCode), client.getUserInfo().getUidCode())) {
+                // 用户识别码和公钥不匹配
+                String err = "User identity error";
+                object = new BasicBSONObject();
+                object.put("STATUS", false);
+                object.put("CONTENT", err.getBytes(StandardCharsets.UTF_8));
+                doWrite(encryptor.encode(BsonUtils.encode(object)));
+                throw new Exception(err);
+            } else if (client == null) {
+                // 找不到用户
                 String err = "User not found";
                 object = new BasicBSONObject();
                 object.put("STATUS", false);
@@ -93,7 +102,7 @@ public class ConnectGuider extends AbstractNetIO {
                 throw new Exception(err);
             }
             // 验证身份
-            Cipher cipher = EncryptUtils.getEncryptCipher(client.getUserInfo().getPublicKey());
+            Cipher cipher = EncryptUtils.getEncryptCipher(KeyFactory.getInstance(KeyPairAlgorithms.RSA).generatePublic(new X509EncodedKeySpec(pubKeyCode)));
             authCode = genAuthCode();
             object = new BasicBSONObject();
             object.put("STATUS", true);
