@@ -5,3 +5,4 @@ logs
 xchat-server.conf
 xchat-server.db
 xchat-server.key
+xchat-server.db.journal
