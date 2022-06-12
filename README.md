@@ -1,5 +1,7 @@
 # XChat-server
 
+## !!该项目已停止更新，请关注后续项目[Cr](https://github.com/ShouChenICU/Cr)
+
 ![Java11](https://img.shields.io/badge/Java-11-red)
 ![Maven3](https://img.shields.io/badge/MAVEN-3-blue)
 
